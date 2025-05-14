@@ -1,0 +1,55 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/
+*.manifest
+*.spec
+
+# === Django ===
+*.log
+local_settings.py
+db.sqlite3
+/media
+/staticfiles
+.env
+.env.*
+
+# === MongoDB (Data & Logs if local folders are used) ===
+/data/
+*.lock
+/logs/
+
+# === Virtual Environment ===
+venv/
+env/
+ENV/
+.venv/
+
+# === VSCode ===
+.vscode/
+
+# === OS-specific ===
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# === Git ===
+*.orig
+*.rej
+
+
+MongoData/
+Pages Designs/

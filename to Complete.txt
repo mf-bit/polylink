@@ -1,0 +1,2 @@
+- Complete the letComment() in Post class: save comment in DB
+- Like toggling in POst

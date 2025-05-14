@@ -1,0 +1,32 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile</title>
+    <link rel="stylesheet" href={% static "users/styles/home.css" %}>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <img src={% static "users/images/bg.png" %} alt="Profile Picture" class="profile-picture">
+            </div>
+            <div class="profile-content">
+                <h1 class="username">{{ user.username }}</h1>
+                <p class="email">{{ user.email }}</p>
+                <div class="friends-section">
+                    <h2>Friends</h2>
+                    <ul class="friend-list">
+                        {%for friend in user.followers%}
+                            <li>{{ friend }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
