@@ -11,7 +11,7 @@ class HomeView(View):
             return redirect("users:login")
         else:
             user = db.get_user_by_session_id(session_id)
-            return render(request, "users/home.html", {"user": user})
+            return render(request, "home.html", {"user": user})
     
 class LoginView(View):
     def get(self, request):
