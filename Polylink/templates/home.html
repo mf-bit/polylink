@@ -9,7 +9,7 @@
   <title>PolyLink</title>
   <link rel="stylesheet" href={% static "styles/home.css" %} />
   <link rel="stylesheet" href={% static "styles/bootstrap-icons.css" %} />
-  <script scr={% static "scripts/home.js" %}></script>
+  <script defer src={% static "scripts/home.js" %}></script>
 </head>
 
 <body>
@@ -22,7 +22,7 @@
     <div class="createbtn-avatar">
       <button class="button create-btn">Create</button>
       <div class="avatar small">
-        <img src="images/profile-1.jpg" alt="profil">
+          <img src={% url "users:avatar" id=user.id %} alt="profil">
       </div>
     </div>
   </header>
@@ -31,28 +31,28 @@
     <aside class="sidebar">
       <div class="profile">
         <div class="avatar">
-          <img src="images/profile-1.jpg" alt="profil">
+          <img src={% url "users:avatar" id=user.id %} alt="profil">
         </div>
         <div class="infos">
-          <h4>Diana Ayi</h4>
-          <p>@dayi</p>
+          <h4>{{user.first_name}} {{user.last_name}}</h4>
+          <p>@{{user.username}}</p>
         </div>
       </div>
       <nav>
-        <a href="#" class="active#"><i class="bi bi-house-heart"></i>
+        <a href={% url "users:home" %} class="active"><i class="bi bi-house-heart"></i>
           <p>Home</p>
         </a>
-        <a href="#"><i class="bi bi-compass"></i>
+        <a href={% url "users:explore" %}><i class="bi bi-compass"></i>
           <p>Explore</p>
         </a>
         <!-- <a href="#">Notifications <span class="badge">9+</span></a> -->
         <!-- <a href="#">Message <span class="badge">6</span></a> -->
-        <a href="#" class="active#"><i class="bi bi-bell">
+        <a href="#"><i class="bi bi-bell">
             <div class="badge">9+</div>
           </i>
           <p>Notifications</p>
         </a>
-        <a href="#" class="active#"><i class="bi bi-envelope">
+        <a href="#"><i class="bi bi-envelope">
             <div class="badge">1</div>
           </i>
           <p>Messages</p>
@@ -73,9 +73,9 @@
     <section class="feed">
       <div class="stories">
         <div class="story">
-          <img class="cover" src="images/story-1.jpg" alt="cover">
+          <img class="cover" src={% url "users:avatar" id=user.id %} alt="cover">
           <div class="avatar story-avatar">
-            <img src="images/profile-1.jpg" alt="profil">
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
           </div>
           <p class="user firstname">Your</p>
           <p class="user lastname">Story</p>
@@ -84,174 +84,79 @@
         <div class="story">
           <img class="cover" src="images/story-2.jpg" alt="cover">
           <div class="avatar story-avatar">
-            <img src="images/profile-1.jpg" alt="profil">
-          </div>
-          <p class="user firstname">Mansour</p>
-          <p class="user lastname">Diop</p>
-        </div>
-
-        <div class="story">
-          <img class="cover" src="images/story-3.jpg" alt="cover">
-          <div class="avatar story-avatar">
-            <img src="images/profile-1.jpg" alt="profil">
-          </div>
-          <p class="user firstname">Mouhamed</p>
-          <p class="user lastname">Diakahte</p>
-        </div>
-
-        <div class="story">
-          <img class="cover" src="images/story-4.jpg" alt="cover">
-          <div class="avatar story-avatar">
-            <img src="images/profile-1.jpg" alt="profil">
-          </div>
-          <p class="user firstname">Charbel</p>
-          <p class="user lastname">Puceau</p>
-        </div>
-
-        <div class="story">
-          <img class="cover" src="images/story-5.jpg" alt="cover">
-          <div class="avatar story-avatar">
-            <img src="images/profile-1.jpg" alt="profil">
-          </div>
-          <p class="user firstname">Zizi</p>
-          <p class="user lastname">Soro</p>
-        </div>
-
-        <div class="story">
-          <img class="cover" src="images/story-6.jpg" alt="cover">
-          <div class="avatar story-avatar">
-            <img src="images/profile-1.jpg" alt="profil">
-          </div>
-          <p class="user firstname">Tina</p>
-          <p class="user lastname">White</p>
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
+          </div>  
         </div>
       </div>
 
-      <div class="post-cta">
-        <div class="avatar story-avatar">
-          <img src="images/profile-1.jpg" alt="profil">
-        </div>
-        <textarea class="happy" spellcheck="false" type="text" placeholder="What's on your mind, Diana?"></textarea>
-        <input type="file" name="attach" id="attach">
-        <label for="attach" class="attach-image-button">
-          <i title="attach an image" class="bi bi-paperclip"></i>
-        </label>
-        <button class="button post-cta-button">Post</button>
-      </div>
-
-      <article class="post">
-        <div class="post-header">
-          <div class="avatar">
-            <img src="images/profile-1.jpg" alt="profil">
-          </div>
-          <div>
-            <h4>Lana Rose</h4>
-            <p>Dubai, 15 minutes ago</p>
-          </div>
-        </div>
-        <p class="post-text">
-          Lana Rose Lorem ipsum dolor sit quisquam eius.
-          My name is Matar. Today, I want to talk about my heart.
-          As you may notice it, I am shy and poilte. People even call 'ChaPolit'.
-          Yeah, I now, there is no relationship.
-        </p>
-        <img src="images/feed-1.jpg" alt="Post Content" class="post-image" />
-        <div class="post-actions">
-          <i class="like-button bi bi-heart"></i>
-          <i class="see-comment-button bi bi-chat-dots"></i>
-          <i class="comment-button bi bi-pen"></i>
-        </div>
-        <div class="post-comments">
-          <!-- The user write its comment here -->
-          <div class="comment-cta">
-            <div class="avatar post-avatar">
-              <img src="images/profile-1.jpg" alt="profil">
+      <form method="POST" action={% url "posts:post" %} class="post-cta-wrapper" enctype="multipart/form-data">
+        {% csrf_token %}
+          <div class="post-cta">
+            <div class="avatar story-avatar">
+                <img src={% url "users:avatar" id=user.id %} alt="profil">
             </div>
-            <textarea spellcheck="false" type="text" placeholder="Want to let a comment, Diana?"></textarea>
-            <button class="button comment-cta-button">Pin</button>
+            <textarea class="happy" spellcheck="false" name="content" placeholder="What's on your mind, {{user.first_name}}?"></textarea>
+            <input type="file" name="image" id="attach">
+            <label for="attach" class="attach-image-button">
+              <i title="attach an image" class="bi bi-paperclip"></i>
+            </label>
+            <button type="button" class="button post-cta-button">Post</button>
           </div>
-
-          <!-- Thr other comments -->
-          <div class="post-comment">
-            <div class="avatar post-avatar">
-              <img src="images/profile-1.jpg" alt="profil">
+          <div class="attach-wrapper">
+            <img src="" alt="attach" class="post-attach">
+            <i class="bi bi-x-circle-fill discard-attach"></i>
+          </div>
+      </form>
+      
+      {% for post in posts %}
+          <article class="post">
+          <div class="post-header">
+            <div class="avatar">
+              <img src={% url "users:avatar" id=user.id %} alt="profil">
             </div>
-            <p>
-              Arrete de raconter ta vie privee.
-            </p>
-          </div>
-
-          <div class="post-comment">
-            <div class="avatar post-avatar">
-              <img src="images/profile-1.jpg" alt="profil">
+            <div>
+              <h4>{{user.first_name}} {{user.last_name}}</h4>
+              <p>{{post.date|stringformat:"s"}}</p>
+              {% comment %} <p>Dubai, 15 minutes ago</p> {% endcomment %}
             </div>
-            <p>
-              Je t'adore. Tu est tres adorable. Continue comme ca. Lorem, ipsum dolor sit amet consectetur adipisicing
-              elit. Quasi aliquam eligendi inventore, doloremque soluta non saepe dignissimos ut pariatur, dicta ipsum
-              ab verita
-              Arrete de raconter ta vie privee.
-            </p>
           </div>
-        </div>
-        <!-- <p class="likes">Liked by Ernest Achiever and 2,323 others</p> -->
-      </article>
+          <p class="post-text">
+            {{post.content}}
+          </p>
+          <img src={% url "posts:post-image" id=post.id %} alt="Post Content" class="post-image" />
+          <div class="post-actions">
+            <i class="like-button bi bi-heart-fill"></i>
+            <p class="likes">{{ post.likes }}</p>
+            <i class="bi bi-eye"></i>
+            <p class="views">{{ post.views }}</p>
+            <i class="see-comment-button bi bi-chat-dots"></i>
+          </div>
+          <div class="post-comments">
+            <!-- The user write its comment here -->
+            <form method="Post" action={% url "posts:comment-post" id=post.id %} class="comment-cta">
+              {% csrf_token %}
+              <div class="avatar post-avatar">
+                <img src={% url "users:avatar" id=user.id %} alt="profil">
+              </div>
+              <textarea name="content" spellcheck="false" type="text" placeholder="Want to let a comment, {{ user.first_name }}?"></textarea>
+              <button type="button" class="button comment-cta-button">Pin</button>
+            </form>
 
-      <article class="post">
-        <div class="post-header">
-          <div class="avatar">
-            <img src="images/profile-1.jpg" alt="profil">
+            <!-- The other comments -->
+            {% for comment in post.comments %}
+                <div class="post-comment">
+                  <div class="avatar post-avatar">
+                    <img src={% url "users:avatar" id=comment.author %} alt="profil">
+                  </div>
+                  <p>
+                    {{comment.content}}
+                  </p>
+                </div>
+            {% endfor %}
           </div>
-          <div>
-            <h4>Lana Rose</h4>
-            <p>Dubai, 15 minutes ago</p>
-          </div>
-        </div>
-        <p class="post-text">
-          Lana Rose Lorem ipsum dolor sit quisquam eius.
-          My name is Matar. Today, I want to talk about my heart.
-          As you may notice it, I am shy and poilte. People even call 'ChaPolit'.
-          Yeah, I now, there is no relationship.
-        </p>
-        <img src="images/feed-5.jpg" alt="Post Content" class="post-image" />
-        <div class="post-actions">
-          <i class="like-button bi bi-heart"></i>
-          <i class="see-comment-button bi bi-chat-dots"></i>
-          <i class="comment-button bi bi-pen"></i>
-        </div>
-        <div class="post-comments">
-          <!-- The user write its comment here -->
-          <div class="comment-cta">
-            <div class="avatar post-avatar">
-              <img src="images/profile-1.jpg" alt="profil">
-            </div>
-            <textarea spellcheck="false" type="text" placeholder="Want to let a comment, Diana?"></textarea>
-            <button class="button comment-cta-button">Pin</button>
-          </div>
-
-          <!-- The other comments -->
-          <div class="post-comment">
-            <div class="avatar post-avatar">
-              <img src="images/profile-1.jpg" alt="profil">
-            </div>
-            <p>
-              Arrete de raconter ta vie privee.
-            </p>
-          </div>
-
-          <div class="post-comment">
-            <div class="avatar post-avatar">
-              <img src="images/profile-1.jpg" alt="profil">
-            </div>
-            <p>
-              Je t'adore. Tu est tres adorable. Continue comme ca. Lorem, ipsum dolor sit amet consectetur adipisicing
-              elit. Quasi aliquam eligendi inventore, doloremque soluta non saepe dignissimos ut pariatur, dicta ipsum
-              ab verita
-              Arrete de raconter ta vie privee.
-            </p>
-          </div>
-        </div>
-        <!-- <p class="likes">Liked by Ernest Achiever and 2,323 others</p> -->
-      </article>
+          <!-- <p class="likes">Liked by Ernest Achiever and 2,323 others</p> -->
+        </article>
+      {% endfor %}
     </section>
 
     <aside class="messages">
@@ -288,6 +193,4 @@
     </aside>
   </main>
 </body>
-<script src="script.js"></script>
-
 </html>

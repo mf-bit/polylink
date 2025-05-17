@@ -1,6 +1,9 @@
 from pymongo import MongoClient
 import pymongo
 import bcrypt
+from bson import Binary, ObjectId
+from django.http import HttpRequest
+from datetime import datetime, timezone
 
 # Create a new connection to the polylink database
 con = MongoClient("mongodb://localhost:27017")
@@ -52,10 +55,31 @@ def change_password(username, old_password, new_password):
     return False
 
 def get_user_by_session_id(session_id):
-    """ This retrieve a user from the database using a session id."""
+    """ This retrieve a user from the database using a session id. I returns a dictionny containing information about the user."""
     user_id = db.sessions.find_one({"session_id": session_id})["user_id"]
     user = db.users.find_one({"_id": user_id})
-    return dict(user)
+    return user
+
+def get_user(request: HttpRequest):
+    """ This retrieve a user from the database using a session id. The retrieve the session id from the receive request object.
+        It returns a dictionny containing information about the user. """
+    session_id = request.COOKIES.get("session_id", None)
+    if not session_id:
+        return None
+    return get_user_by_session_id(session_id)
+
+def get_user_id_by_session_id(session_id):
+    """ This retrieves a user'id from the database using a session id. It returns the id in a string representation """
+    user_id = db.sessions.find_one({"session_id": session_id})["user_id"]
+    if not user_id:
+        return None
+    return user_id
+
+def get_user_id(request: HttpRequest):
+    """ This retrieve a user from the database using a session id. The retrieve the session id from the receive request object.
+    It returns a dictionny containing information about the user. """
+    return get_user_id_by_session_id(request.COOKIES.get("session_id", None))
+
 
 def remove_session(session_id):
     """ Handles sessions deletion. It returns true if succesful"""
@@ -65,7 +89,30 @@ def remove_session(session_id):
 def isUsername(username):
     return bool(db.users.find_one({"username": username}))
 
-# register("minato", "shee", "minatoshee", "nice")
+##### utily function for testing purpose only
+def output_dict(dic):
+    print("{")
+    for key, value in dic.items():
+        print(f"{key}: {value}")
+    print("}")
 
-# print(f"{type(login("matarfaly", "nico")["_id"]) == "68222f88350ff534dd6c4bd0"}")
-# print(login("matarfaly", "nico"))
+with open("100 men 1 gorilla.mp4", "rb") as file:
+    vid_byes = file.read()
+    format = "mp4"
+
+with open("thumbnail.png", "rb") as file:
+    thumbnail = file.read()
+    th_format = "png"
+
+db.stories.insert_one({
+    "author": ObjectId("68222f88350ff534dd6c4bd0"),
+    "views": 0,
+    "likes": 0,
+    "format": format,
+    "thumnail_format": th_format,
+    "date": datetime.now(timezone.utc),
+    "content": Binary(vid_byes),
+    "thumbnail": Binary(thumbnail),
+})
+
+

@@ -7,6 +7,11 @@
   font-size: 0.95rem;
 }
 
+*::selection{
+  color: white;
+  background-color: #988ee0;
+}
+
 /* Layout */
 body {
   background: #f4f2ff;
@@ -95,7 +100,8 @@ body {
 
 .avatar img{
   width: 100%;
-  height: auto;
+  height: 100%; /* was auto */
+  object-fit: cover;
 }
 
 .container {
@@ -189,7 +195,7 @@ body {
 /* Feed */
 .feed {
   flex: 2;
-  max-width: 850px;
+  max-width: 750px;
 }
 
 .stories {
@@ -255,15 +261,68 @@ body {
   box-shadow: none;
 }
 
+.post-cta-wrapper{
+  margin-bottom: 1rem;
+  width: 100%;
+  height: fit-content;
+  background-color: white;
+  border-radius: 20px;  /* update for if changed */
+}
+
+.post-cta-wrapper .attach-wrapper{
+  position: relative;
+  width: fit-content;
+  margin-left: 8%;
+  margin-bottom: 0.25rem;
+  position: relative; 
+  display: none;
+}
+
+.post-cta-wrapper img.post-attach{
+  width: 3.125rem; /* 50px if 1rem=16px*/ 
+  height: 3.125rem;
+  object-fit: cover;
+  border-radius: 20%;
+}
+
+.post-cta-wrapper .attach-wrapper::after{
+  content: "";
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.post-cta-wrapper .attach-wrapper:hover::after{
+  background-color: rgba(255, 255, 255, 0.382);
+}
+
+.post-cta-wrapper .attach-wrapper i{  /* the cancel button to trigger to discuard the attachment selection */
+  position: absolute;
+  left: -8%;
+  top: -17%;
+  color: #6c5ce7;
+  font-size: 1.3rem;
+  font-weight: bold;
+  transition: transform 2s ease-out color 2s ease-out;
+  z-index: 10;
+}
+
+.post-cta-wrapper .attach-wrapper i:hover{  /* the cancel button to trigger to discuard the attachment selection */
+  transform: scale(1.1);
+  transform-origin: center;
+  color: rgb(255, 64, 0);
+}
+
 .post-cta, .comment-cta{
   width: 100%;
   height: fit-content;
   padding: 0.5rem 1rem;
-  border-radius: 30px;
+  border-radius: 20px;
   background-color: white;
   display: flex;
   justify-content: center;
-  margin-bottom: 1rem;
 }
 
 .comment-cta{
@@ -316,11 +375,13 @@ body {
 }
 
 .post-cta .attach-image-button{
+  width: fit-content;
+  height: fit-content;
   transform: rotate(45deg);
   transform-origin: center;
   margin-right: 1.2rem;
   position: relative;
-  bottom: 0.1rem;
+  top: 0.15rem;
   transition: transform 0.2s ease;
 }
 
@@ -366,6 +427,8 @@ body {
 .post-image {
   width: 100%;
   height: auto;
+  max-height: 500px;
+  object-fit: cover;
   border-radius: 10px;
 }
 
@@ -378,13 +441,26 @@ body {
   padding-left: 10px;
 }
 
+.post-actions .likes, .post-actions .views{
+  margin-left: -0.7rem;
+}
+
+
 .post-actions i{
   font-size: 1.05rem;
+  transition: all 0.5 ease-in;
+}
+
+.post-actions i:hover{
+  transform: scale(1.2);
+  color: #6c5ce7;
+  transform-origin: center;
 }
 
 .post-actions i:nth-child(1){  /* The 'message' bootstrap item is a little bit lower. May be it was built that way: really hate this 😒! */
   position: relative;
   bottom: -0.05rem;
+  color: red;
 }
 
 .post-comments{
@@ -394,7 +470,7 @@ body {
   padding: 0.5rem 0.6rem;
   margin-left: 3rem;
   /* box-shadow: 0px 0px 60px #efefef; */
-  /* display: none; */
+  display: none;
 }
 
 .post-comment{

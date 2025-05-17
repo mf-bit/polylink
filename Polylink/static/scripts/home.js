@@ -19,13 +19,13 @@ class Post {
         this.seeCommentButton.addEventListener("click", this.toggleCommentVisibility.bind(this));
 
         /** The comments section */
-        this.commentsSection = post.querySelector(".post-comments");
+        this.commentsSection = post.querySelector(".post-comments");  
 
         /** The Http element representing the button to trigger to write a comment */
         this.commentButton = post.querySelector(".comment-button");
 
         /** The element that the user must interact in order to make a comment */
-        this.letCommentEl = post.querySelector(".comment-cta");
+        this.letCommentEl = post.querySelector(".comment-cta");  // This is a form by the way       
         this.letCommentEl.querySelector("button").addEventListener("click", this.letComment.bind(this));
     }
 
@@ -53,10 +53,12 @@ class Post {
      * Toggles the visibility of the comments section.
      */
     toggleCommentVisibility() {
-        if (this.commentsSection.style.display == "none")
+        if (this.commentsSection.style.display == "none"){
             this.commentsSection.style.display = "block";
-        else
+        }
+        else{
             this.commentsSection.style.display = "none"
+        }
     }
 
     /**
@@ -66,7 +68,7 @@ class Post {
         let textEl = this.letCommentEl.querySelector("textarea");
 
         // Make a request to the database to store the comments 
-        /* code here */
+        this.letCommentEl.submit();
 
         // Receive the comment and insert in the comments section, after the comment-cta section (cta stands for call to action if you didn't know 🤧)
         // ======== that is better to let this following handled by the backend later ============
@@ -75,7 +77,7 @@ class Post {
         commentEl.innerHTML = `
             <div class="post-comment">
                 <div class="avatar post-avatar">
-                    <img src="images/profile-1.jpg" alt="profil">
+                    <img src=${document.querySelector(".sidebar .profile .avatar img").src} alt="profil">
                 </div>
                 <p>
                     ${content}
@@ -93,71 +95,97 @@ class Post {
  * This represents the post-cta section. 
  * @class
  */
-class PostCTA {
+class PostCTAWrapper {
     /**
      * Instantiates a new object. I can resist: It is stronger than me commenting even if I know you know 😭
-     * @param {HttpElement} postCTA The block representing the post call-to-action section.
+     * @param {HttpElement} postCTAWrapper The block representing the post call-to-action section.
      */
-    constructor(postCTA) {
-        this.postCtaEl = postCTA;
-        this.textEl = postCTA.querySelector("textarea");
+    constructor(postCTAWrapper) {
+        this.postCTAWrapperEl = postCTAWrapper;  // this is a form by the way
+        this.textEl = postCTAWrapper.querySelector("textarea");
 
         /** The button that the user must trigger to attach a image to its post / The input containing the attached images. */
-        this.attachButton = postCTA.querySelector(".attach-image-button");
-        this.input = postCTA.querySelector("input#attach");
+        this.attachButton = postCTAWrapper.querySelector(".attach-image-button");
+        this.input = postCTAWrapper.querySelector("input#attach");
         this.input.addEventListener("change", this.loadAttach.bind(this));
 
-        this.button = postCTA.querySelector("button");
+        this.button = postCTAWrapper.querySelector("button");
         this.button.addEventListener("click", this.post.bind(this));
+
+        /** The section containing any uploaded attachement */
+        this.attachSection = postCTAWrapper.querySelector(".attach-wrapper");
+
+        /** The image element containing the uploaded attachement */
+        this.attachImgEl = postCTAWrapper.querySelector(".attach-wrapper img");
+
+        /** The button to click on in order to discard a chosen attachement */
+        this.discardAttachButton = postCTAWrapper.querySelector(".attach-wrapper .discard-attach");
+        this.discardAttachButton.addEventListener("click", this.discardAttach.bind(this));
+    }
+
+    /** Handles the action of liking a post */
+    like(){
+        ;
     }
 
     /**
      * Handles the action that consist of posting a new post.
      */
-    post() {
+    post(){
+        // Post the ressources to the backend
+        this.postCTAWrapperEl.submit();
+        
         // Retrive and add post to the posts section, just after the post-cta section (the section this object represents then)
         // You better let the backend give you the block's html structur after
         let content = this.textEl.value;
         let postEl = document.createElement("div");
+        // The cross-validation token inserted by Django
+        let csrf_value= this.postCTAWrapperEl.querySelector("input[name='csrfmiddlewaretoken']").value;
         postEl.innerHTML = `
         <article class="post">
             <div class="post-header">
             <div class="avatar">
-                <img src="images/profile-1.jpg" alt="profil">
+                <img src=${this.postCTAWrapperEl.querySelector(".avatar img").src} alt="profil">
             </div>
             <div>
-                <h4>Lana Rose</h4>
-                <p>Dubai, 15 minutes ago</p>
+                <h4>${document.querySelector(".sidebar .infos h4").textContent}</h4>
+                <p>${new Date().toISOString()}</p>
             </div>
             </div>
             <p class="post-text">
                 ${content}
             </p>
-            <img src="images/feed-1.jpg" alt="Post Content" class="post-image" />
+            <img src=${this.attachImgEl.src} alt="Post Content" class="post-image" />
+
             <div class="post-actions">
-            <i class="like-button bi bi-heart"></i>
-            <i class="see-comment-button bi bi-chat-dots"></i>
-            <i class="comment-button bi bi-pen"></i>
+                <i class="like-button bi bi-heart-fill"></i>
+                <p class="likes">0</p>
+                <i class="bi bi-eye"></i>
+                <p class="views">0</p>
+                <i class="see-comment-button bi bi-chat-dots"></i>
             </div>
+
             <div class="post-comments">
-            <!-- The user write its comment here -->
-            <div class="comment-cta">
-                <div class="avatar post-avatar">
-                <img src="images/profile-1.jpg" alt="profil">
-                </div>
-                <textarea spellcheck="false" type="text" placeholder="Want to let a comment, Diana?"></textarea>
-                <button class="button comment-cta-button">Pin</button>
+                <form method="Post" action="{% url "posts:comment-post" id=post.id %}" class="comment-cta">
+                    <input type=hidden name="csrfmiddlewaretoken" value=${csrf_value} />
+                    <div class="avatar post-avatar">
+                        <img src=${this.postCTAWrapperEl.querySelector(".avatar img").src} alt="profil">
+                    </div>
+                    <textarea name="content" spellcheck="false" type="text" placeholder="Want to let a comment?"></textarea>
+                    <button type="button" class="button comment-cta-button">Pin</button>
+                </form>
             </div>
         </article>
         `;
         let feedEl = document.querySelector(".feed");  // the feed represents the block that has the posts, stories, etc. That is the block in the middle of the page
-        feedEl.insertBefore(postEl, this.postCtaEl.nextElementSibling)
+        feedEl.insertBefore(postEl, this.postCTAWrapperEl.nextElementSibling)
 
         // We have to link this new post element to a postObject to make it alive
         new Post(postEl);
 
-        // Clear textarea content
+        // Clear textarea content and remove the attach
         this.textEl.value = "";
+        this.discardAttach();
     }
 
     /** 
@@ -165,10 +193,31 @@ class PostCTA {
      * */
     loadAttach(){
         // Ensures that something is really attach and that that thing is an image: never trust an user input 😒!
-        if(this.input.files.length == 0 && !this.isImage(this.input.value))
+        if(this.input.files.length == 0 || !this.input.files[0].type.includes("image"))
             return;
+        
+        const reader = new FileReader();
+        reader.onload = () => {
+            this.attachImgEl.src = reader.result;  // upload the image on the front
+            this.attachSection.style.display = "block";   // make the attachment section visible
+        }
+        // Notice that when the reader.onload function will be executed, the context will be tied to the global object, wchich is here
+        // (in the browser) the window object. We have to set the 'this' keyword to the current obejct then. Dawm I handle this concept 😍!
+        // reader.onload.bind(this);
 
-        //... to continue
+        reader.readAsDataURL(this.input.files[0]);
+    }
+
+    /** 
+     * Discards a chosen attached image.
+     * */
+    discardAttach(){
+        // Remove the selected attachement from the input element
+        this.input.value = "";
+        // Remove the attachement rendering from the page
+        this.attachImgEl.src = "";
+        this.attachSection.style.display = "none";
+
     }
 
     /**
@@ -196,10 +245,21 @@ postInputEls.forEach((postInputEl) => {
     )
 })
 
-// Create Post elements and the PostCTA element
+// Create Post elements and the PostCTAWrapper element
 let postList = document.querySelectorAll(".post");
 postList.forEach((post) => {
     new Post(post);
 })
 
-new PostCTA(document.querySelector(".post-cta"));
+new PostCTAWrapper(document.querySelector(".post-cta-wrapper"));
+
+// const file = document.querySelector(".post-cta input").files[0];
+// const reader = new FileReader();
+// reader.onload = function(event){
+//     const reader = event.target;
+//     console.log(`Result: ${reader.result}`);
+// }
+
+// // reader.readAsText(file);
+// reader.readAsDataURL(file);
+// console.log(reader.result)

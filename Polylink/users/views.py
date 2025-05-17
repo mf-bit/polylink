@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.views import View
 from . import forms
 import db
+import bson
+from django.http import HttpResponse
 
 class HomeView(View):
     def get(self, request):
@@ -10,9 +12,44 @@ class HomeView(View):
         if not session_id:  # there is no active connection then
             return redirect("users:login")
         else:
+            # Fetch the user
             user = db.get_user_by_session_id(session_id)
-            return render(request, "home.html", {"user": user})
+            # the user might not exist or the session is any longer active: we havae to check for it then
+            if not user:
+                return redirect("users:login")
+            
+            """ Djnago templates do not like obejct's attribute that start with a underscore '_'.
+                So, we have to turn 'user._id' into 'user.id'. Also, _id is of type bson.ObjectId, and we want it to be a string once in the template."""
+            user["id"] = user["_id"]
+
+            # Build a querying pipeleine for post retrieval: Note that we want to retreve the user's posts with the comments
+            # embedded in each post
+            pipeline = [
+                { "$match": {"author": user["_id"]} },
+                {"$sort": {"date": -1}},
+                { "$lookup":{
+                    "from": "comments",
+                    "let": {"post_id": "$_id"},
+                    "pipeline": [
+                        {"$match": {"$expr": {"$eq": ["$post", "$$post_id"]}}},
+                        {"$sort": {"date": -1}},
+                    ],
+                    "as": "comments",
+                }}
+            ]
+
+            # Fetch all the post of the user
+            posts = list(db.db.posts.aggregate(pipeline)) # We going to iterate 'posts' and 'posts.comments' in the template: we need a iterable then, not a cursor object from Mongo
+
+            for post in posts:
+                post["id"] = str(post["_id"])
+                post["comments"] = list(post["comments"])  # In the same way, we need 'posts.comments' as an iterable in the template
+            
+            return render(request, "home.html", {"user": user, "posts": posts})  
     
+class ExploreView(View):
+    pass
+
 class LoginView(View):
     def get(self, request):
         return render(request, "users/login.html")
@@ -61,3 +98,10 @@ class RegisterView(View):
                 print(f"\t{key}: {value},")
             print("}")
             return redirect("users:register")
+
+class AvatarView(View):
+    def get(self, request, id:str):
+        user = db.db.users.find_one({"_id": bson.ObjectId(id)})
+        img_bytes = bytes(user["avatar"])
+        content_type = f"image/{user["avatar_format"]}"
+        return HttpResponse(content=img_bytes, content_type=content_type)
