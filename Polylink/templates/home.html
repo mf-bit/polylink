@@ -9,9 +9,15 @@
   <title>PolyLink</title>
   <link rel="stylesheet" href={% static "styles/home.css" %} />
   <link rel="stylesheet" href={% static "styles/bootstrap-icons.css" %} />
+  <style>
+    @font-face {
+      font-family: "Bootstrap Font";
+      src: url({% static "styles/fonts/bootstrap-icons.woff" %}) format("woff"), 
+          url({% static "styles/fonts/bootstrap-icons.woff2" %}) format("woff2");
+    }
+  </style>
   <script defer src={% static "scripts/home.js" %}></script>
 </head>
-
 <body>
   <header class="navbar">
     <div class="logo">PolyLink</div>
@@ -19,8 +25,10 @@
       <i class="bi bi-search search-icon"></i>
       <input type="text" placeholder="Search for creators, inspirations, and projects" />
     </div>
-    <div class="createbtn-avatar">
-      <button class="button create-btn">Create</button>
+    <div class="logout-avatar">
+      <a href="{% url "users:logout" %}">
+        <button class="button logout-btn">Log out</button>
+      </a>
       <div class="avatar small">
           <img src={% url "users:avatar" id=user.id %} alt="profil">
       </div>
@@ -72,21 +80,24 @@
 
     <section class="feed">
       <div class="stories">
-        <div class="story">
+        <label class="story add-story" for="story-attach" url={% url "stories:story" %}>
           <img class="cover" src={% url "users:avatar" id=user.id %} alt="cover">
           <div class="avatar story-avatar">
             <img src={% url "users:avatar" id=user.id %} alt="profil">
           </div>
           <p class="user firstname">Your</p>
           <p class="user lastname">Story</p>
-        </div>
+          <input type="file" name="story-attach" class="story-attach-input" id="story-attach">
+        </label>
 
-        <div class="story">
-          <img class="cover" src="images/story-2.jpg" alt="cover">
-          <div class="avatar story-avatar">
-            <img src={% url "users:avatar" id=user.id %} alt="profil">
-          </div>  
-        </div>
+        {% for story in stories %}
+          <a href={% url "stories:get-story" id=story.id %}>
+            <div class="story">
+              <i class="bi bi-x-circle-fill delete-post-button" url={% url "stories:delete-story" id=story.id %}></i>
+              <img class="cover" src={% url "stories:story-thumbnail" id=story.id %} alt="cover">
+            </div>
+          </a>
+        {% endfor %}
       </div>
 
       <form method="POST" action={% url "posts:post" %} class="post-cta-wrapper" enctype="multipart/form-data">
@@ -107,7 +118,6 @@
             <i class="bi bi-x-circle-fill discard-attach"></i>
           </div>
       </form>
-      
       {% for post in posts %}
           <article class="post">
           <div class="post-header">
@@ -119,6 +129,7 @@
               <p>{{post.date|stringformat:"s"}}</p>
               {% comment %} <p>Dubai, 15 minutes ago</p> {% endcomment %}
             </div>
+            <i class="bi bi-x-circle-fill delete-post-button" url={% url "posts:delete-post" id=post.id %}></i>
           </div>
           <p class="post-text">
             {{post.content}}

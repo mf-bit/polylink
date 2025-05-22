@@ -124,7 +124,7 @@ class Post {
             headers: {
                 'X-CSRFToken': cookies.csrftoken
             }
-        }).catch();
+        }).then().catch();
 
         // Removes the post from the from
         this.postElement.remove();
@@ -272,102 +272,6 @@ class PostCTAWrapper {
     }
 }
 
-
-/**
- * This represents a story block the user must trigger to add a story.
- * @class
- */
-class AddStoryEl{
-    /**
-     * Instantiate a new element.
-     * @param {HttpElement} addStoryElement The html block that represents the story block to trigger in order to add a story.
-     */
-    constructor(addStoryElement){
-        this.addStoryEl = addStoryElement;
-        /** The input aimed to received the upload video */
-        this.input = addStoryElement.querySelector("input.story-attach-input");
-        this.input.addEventListener("change", this.uploadStory.bind(this));
-
-        /** The endpoint to query in order to upload a new story */
-        this.endpoint = this.addStoryEl.attributes.url.value;
-    }
-
-    /** 
-     * Handles a story upload to the platform
-     */
-    uploadStory(){
-        // Ensures that a file is really upload and that what is upload is really a video: users are the worst dev'ops
-        if(this.input.files.length == 0 || !this.input.files[0].type.includes("video"))
-            return;
-
-        // Send the previous extracted infos to the server
-        const formData = new FormData();
-        formData.append("content", this.input.files[0]);
-        fetch(this.endpoint, {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": cookies.csrftoken,
-            },
-            body: formData,
-        }).then(response => {if(response.ok) return response.json();})
-        .then(data => {
-            console.log("Bien dedans!");
-            // Once we upload the story, the server will provide us with the the ressource's url, the thumbnail's url, and deletion's url too
-            let content_url = data.content_url; 
-            let thumbnail_url = data.thumbnail_url;
-            let delete_url = data.delete_url;
-
-            // Insert the newly upload story on the front
-            console.log(`content-url: ${content_url}`);
-            console.log(`thumbbnail-url: ${thumbnail_url}`);
-            const element = document.createElement("a");
-            element.href = content_url;
-            element.innerHTML = `
-                <div class="story">
-                    <i class="bi bi-x-circle-fill delete-post-button" url=${delete_url}></i>
-                    <img class="cover" src=${thumbnail_url} alt="cover">
-                </div>
-            `;
-            this.addStoryEl.parentElement.insertBefore(element, this.addStoryEl.nextElementSibling);
-        })
-        .catch();
-    }
-}
-
-/** 
- * This represents a story element.
- */
-class Story{
-    /**
-     * Instantiate a new element.
-     * @param {HttpElement} story The html block that represents the story block.
-     */
-    constructor(story){
-        this.story = story;
-        this.deleteButton = story.querySelector(".delete-post-button");
-        this.deleteButton.addEventListener("click", (event) => this.delete.bind(this)(event));
-    }
-
-    /**
-     * This handles the deletion of a story
-     * @param {Event} event The event object triggered by the DOM
-     */
-    delete(event){
-        // Prevent the anchor from being triggered
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        fetch(this.deleteButton.attributes.url.value, {
-            method: "DELETE",
-            headers: {
-                "X-CSRFToken": cookies.csrftoken,
-            },
-        })
-
-        // Remove the post from the page
-        this.story.remove();
-    }
-}
-
 // ===================================================================================
 // ===================================================================================
 
@@ -386,18 +290,8 @@ let postList = document.querySelectorAll(".post");
 postList.forEach((post) => {
     new Post(post);
 })
+
 new PostCTAWrapper(document.querySelector(".post-cta-wrapper"));
-
-// Create stories elements
-let stories = document.querySelectorAll(".feed .story:not(.add-story)"); // Note that we do not need to handle the .add-story element element
-stories.forEach((story)=>{
-    new Story(story);
-})
-
-// Create a addStory element object
-let story = document.querySelector(".feed .story.add-story");
-new AddStoryEl(story);
-
 
 // const file = document.querySelector(".post-cta input").files[0];
 // const reader = new FileReader();
@@ -409,3 +303,5 @@ new AddStoryEl(story);
 // // reader.readAsText(file);
 // reader.readAsDataURL(file);
 // console.log(reader.result)
+
+

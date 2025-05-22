@@ -22,7 +22,7 @@ class HomeView(View):
                 So, we have to turn 'user._id' into 'user.id'. Also, _id is of type bson.ObjectId, and we want it to be a string once in the template."""
             user["id"] = user["_id"]
 
-            # Build a querying pipeleine for post retrieval: Note that we want to retreve the user's posts with the comments
+            # Build a querying pipeleine for posts retrieval: Note that we want to retreve the user's posts with the comments
             # embedded in each post
             pipeline = [
                 { "$match": {"author": user["_id"]} },
@@ -38,14 +38,20 @@ class HomeView(View):
                 }}
             ]
 
-            # Fetch all the post of the user
+            # Fetch all the posts of the user
             posts = list(db.db.posts.aggregate(pipeline)) # We going to iterate 'posts' and 'posts.comments' in the template: we need a iterable then, not a cursor object from Mongo
 
             for post in posts:
                 post["id"] = str(post["_id"])
                 post["comments"] = list(post["comments"])  # In the same way, we need 'posts.comments' as an iterable in the template
             
-            return render(request, "home.html", {"user": user, "posts": posts})  
+            # Retrive all the stories from the database: note that at this stage, we only need the story id
+            pipeline = [
+                {"$match": {"author": user["_id"]}},
+                {"$project": {"_id":1, "id": "$_id"}},
+            ]
+            stories = db.db.stories.aggregate(pipeline).to_list() # We will need an iterable in the template
+            return render(request, "home.html", {"user": user, "posts": posts, "stories": stories})  
     
 class ExploreView(View):
     pass

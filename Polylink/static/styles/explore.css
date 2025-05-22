@@ -215,64 +215,20 @@ body {
   overflow: hidden;
 }
 
-.story .delete-post-button{
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 1.5rem;
-  color: #6c5ce737;
-  transition: all 0.5s ease;
-  z-index: 10;
-
-}
-
-.story:hover .delete-post-button{
-  color: white;
-  transform: scale(1.2) rotate(90deg);
-}
-
-.story:hover .delete-post-button:hover{
-  color: red;
-}
-
-.story.add-story::before{
+.story::before{
   content: "";
   width: 100%;
   height: 100%;
-  /* background-color: black; */
+  background-color: black;
   background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.2), rgba(0,0,0,0.5));
   position: absolute;
   top: 0px;
   left: 0px;
 }
 
-.story.add-story{
-  position: relative; /* This is for the input element within it */
-}
-.story.add-story:hover::before{
-  background-color: #6c5ce7;
-  font-family: 'Bootstrap Font';  /* The font-face is defined in the html page */
-  content: "\F4FE";  /* The content is a plus icon */
-  color: white;
-  font-weight: 800;
-  font-size: 2.5rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-
-}
-
-.story.add-story .story-attach-input{
-  width: 0px;
-  height: 0px;
-  position: absolute;
-}
-
 .story .cover{
   width: 100%;
   height: 100%;
-  object-fit: cover;
 }
 
 .story .user, .story .story-avatar{

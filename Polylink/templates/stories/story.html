@@ -1,0 +1,31 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Story</title>
+  <link rel="stylesheet" href={% static "styles/stories/story.css" %}/>
+  <link rel="stylesheet" href={% static "styles/bootstrap-icons.css" %}/>
+</head>
+<body>
+  <div class="story-container">
+    <video class="story-video" autoplay loop controls>
+      <source src={% url "stories:story-content" id=story.id %} type="video/{{story.format}}" />
+      Your browser does not support the video tag.
+    </video>
+
+    <div class="video-overlay">
+      <div class="info-box">
+        <i class="bi bi-eye"></i>
+        <span>1.2M</span>
+      </div>
+      <div class="info-box">
+        <i class="bi bi-heart"></i>
+        <span>87K</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

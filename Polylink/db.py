@@ -96,23 +96,39 @@ def output_dict(dic):
         print(f"{key}: {value}")
     print("}")
 
-with open("100 men 1 gorilla.mp4", "rb") as file:
-    vid_byes = file.read()
-    format = "mp4"
+# with open("100 men 1 gorilla.mp4", "rb") as file:
+#     vid_byes = file.read()
+#     format = "mp4"
 
-with open("thumbnail.png", "rb") as file:
-    thumbnail = file.read()
-    th_format = "png"
+# with open("thumbnail.png", "rb") as file:
+#     thumbnail = file.read()
+#     th_format = "png"
 
-db.stories.insert_one({
-    "author": ObjectId("68222f88350ff534dd6c4bd0"),
-    "views": 0,
-    "likes": 0,
-    "format": format,
-    "thumnail_format": th_format,
-    "date": datetime.now(timezone.utc),
-    "content": Binary(vid_byes),
-    "thumbnail": Binary(thumbnail),
-})
+# db.stories.insert_one({
+#     "author": ObjectId("68222f88350ff534dd6c4bd0"),
+#     "views": 0,
+#     "likes": 0,
+#     "format": format,
+#     "thumnail_format": th_format,
+#     "date": datetime.now(timezone.utc),
+#     "content": Binary(vid_byes),
+#     "thumbnail": Binary(thumbnail),
+# })
 
 
+# pipeline = [
+#                 {"$match": {"author": ObjectId("68222f88350ff534dd6c4bd0")}},
+#                 {"$project": {"_id":1}},
+#             ]
+
+# st = db.stories.aggregate(pipeline)
+
+# pipeline = [
+#                 {"$match": {"author": ObjectId("68222f88350ff534dd6c4bd0")}},
+#                 {"$project": {"_id": 1, "id": "$_id"}},
+#             ]
+# stories = db.stories.aggregate(pipeline) # We will need an iterable in the template
+# print('==========')
+# for s in stories:
+#     print(s)
+# print('==========')
