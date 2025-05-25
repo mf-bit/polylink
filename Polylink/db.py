@@ -10,13 +10,15 @@ con = MongoClient("mongodb://localhost:27017")
 db = con["polylink"]
 
 # Let's define some utilities functions
-def register(firstname, lastname, username, password):
+def register(firstname, lastname, username, password, profile_bytes, profile_format):
     """ This handles a new user registration. It returns nothing"""
     db.users.insert_one({
         "first_name": firstname,
         "last_name": lastname,
         "username": username,
         "password": bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8"),
+        "avatar": Binary(profile_bytes),
+        "avatar_format": profile_format,
     })
     return
 
@@ -56,9 +58,12 @@ def change_password(username, old_password, new_password):
 
 def get_user_by_session_id(session_id):
     """ This retrieve a user from the database using a session id. I returns a dictionny containing information about the user."""
-    user_id = db.sessions.find_one({"session_id": session_id})["user_id"]
-    user = db.users.find_one({"_id": user_id})
-    return user
+    session = db.sessions.find_one({"session_id": session_id})
+    if session:
+        user_id = session["user_id"]
+        user = db.users.find_one({"_id": user_id})
+        return user 
+    return None
 
 def get_user(request: HttpRequest):
     """ This retrieve a user from the database using a session id. The retrieve the session id from the receive request object.
@@ -96,39 +101,13 @@ def output_dict(dic):
         print(f"{key}: {value}")
     print("}")
 
-# with open("100 men 1 gorilla.mp4", "rb") as file:
-#     vid_byes = file.read()
-#     format = "mp4"
 
-# with open("thumbnail.png", "rb") as file:
-#     thumbnail = file.read()
-#     th_format = "png"
+with open("bg.png", 'rb') as file:
+    img_bytes = file.read()
+    img_format = "png"
+    db.users.update_one({"username": 'matarfaly'}, {'$set': {'avatar': Binary(img_bytes), 'avatar_format': img_format}})
 
-# db.stories.insert_one({
-#     "author": ObjectId("68222f88350ff534dd6c4bd0"),
-#     "views": 0,
-#     "likes": 0,
-#     "format": format,
-#     "thumnail_format": th_format,
-#     "date": datetime.now(timezone.utc),
-#     "content": Binary(vid_byes),
-#     "thumbnail": Binary(thumbnail),
-# })
-
-
-# pipeline = [
-#                 {"$match": {"author": ObjectId("68222f88350ff534dd6c4bd0")}},
-#                 {"$project": {"_id":1}},
-#             ]
-
-# st = db.stories.aggregate(pipeline)
-
-# pipeline = [
-#                 {"$match": {"author": ObjectId("68222f88350ff534dd6c4bd0")}},
-#                 {"$project": {"_id": 1, "id": "$_id"}},
-#             ]
-# stories = db.stories.aggregate(pipeline) # We will need an iterable in the template
-# print('==========')
-# for s in stories:
-#     print(s)
-# print('==========')
+with open("laye.jpg", 'rb') as file:
+    img_bytes = file.read()
+    img_format = "jpg"
+    db.users.update_one({"username": 'laye'}, {'$set': {'avatar': Binary(img_bytes), 'avatar_format': img_format}})

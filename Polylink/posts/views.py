@@ -1,28 +1,42 @@
 from django.shortcuts import render
 from django.views import View
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpResponse, HttpRequest, JsonResponse
 import db
 from datetime import datetime, timezone
 import bson
+from django.urls import reverse
 
 class PostView(View):
     def post(self, request:HttpRequest):
         user_id = db.get_user_id(request)
         content = request.POST.get("content")
-        image = request.FILES.get("image").read() # this is a bytes object by the way
-        image_name = request.FILES.get("image").name
-        ext = image_name[image_name.rfind(".") + 1 : len(image_name)].lower() # retreive extension from image name
-        db.db.posts.insert_one({
+
+        # Insert basic informations we sure the existance for every post
+        post = db.db.posts.insert_one({
             "author": bson.ObjectId(user_id),
             "content": content,
-            "image": bson.Binary(image),
-            "image_format": ext,
             "date": datetime.now(timezone.utc),
             "likes": 0,
             "views": 0,
         })
-        response = HttpResponse()
-        response.status_code = 204  # 204 mean that no actual content is being return. If you do not understand, google it
+
+        # Add image if provided
+        image_file = request.FILES.get("image", None)
+        if image_file:
+            image = image_file.read()  # this is a bytes object by the way
+            image_name = request.FILES.get("image").name
+            ext = image_name[image_name.rfind(".") + 1 : len(image_name)].lower() # retreive extension from image name
+
+            db.db.posts.update_one({'_id': post.inserted_id},
+                {'$set': {
+                    "image": bson.Binary(image),
+                    "image_format": ext,
+                }}
+            )
+        content = {
+            "delete_url": reverse('posts:delete-post', kwargs={"id":post.inserted_id})
+        }
+        response = JsonResponse(content)
         return response
     
     def delete(self, request:HttpRequest, id:str):

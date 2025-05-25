@@ -33,12 +33,13 @@ class Post {
         this.likeButton = post.querySelector(".like-button");
         this.likeButton.addEventListener('click', this.toggleLike.bind(this));
 
+        /** The comments section */
+        this.commentsSection = post.querySelector(".post-comments"); 
+        this.commentsSection.style.display = "none"; 
+
         /** The Http element representing the button to trigger to comment the post. */
         this.seeCommentButton = post.querySelector(".see-comment-button");
         this.seeCommentButton.addEventListener("click", this.toggleCommentVisibility.bind(this));
-
-        /** The comments section */
-        this.commentsSection = post.querySelector(".post-comments");  
 
         /** The Http element representing the button to trigger to write a comment */
         this.commentButton = post.querySelector(".comment-button");
@@ -80,7 +81,7 @@ class Post {
             this.commentsSection.style.display = "block";
         }
         else{
-            this.commentsSection.style.display = "none"
+            this.commentsSection.style.display = "none";
         }
     }
 
@@ -150,7 +151,7 @@ class PostCTAWrapper {
         this.input.addEventListener("change", this.loadAttach.bind(this));
 
         this.button = postCTAWrapper.querySelector("button");
-        this.button.addEventListener("click", this.post.bind(this));
+        this.button.addEventListener("click", (event) => this.post.bind(this)(event));
 
         /** The section containing any uploaded attachement */
         this.attachSection = postCTAWrapper.querySelector(".attach-wrapper");
@@ -173,59 +174,75 @@ class PostCTAWrapper {
      */
     post(){
         // Post the ressources to the backend
-        this.postCTAWrapperEl.submit();
+        // this.postCTAWrapperEl.submit();
+        const endpoint = this.postCTAWrapperEl.action;
+        let formData = new FormData(this.postCTAWrapperEl);
+        fetch(endpoint, {
+            method: "POST",
+            headers: {
+                'X-CSRFToken': cookies.csrftoken,
+            },
+            body: formData,
+        }).then(response => response.json())
+        .then(data => {
+            // Retrive and add post to the posts section, just after the post-cta section (the section this object represents then)
+            // You better let the backend give you the block's html structur after
+            let content = this.textEl.value;
+            let postEl = document.createElement("div");
+            // The cross-validation token inserted by Django
+            let csrf_value= cookies.csrftoken;  // This variable is created early in this script: look at above 
+
+            // Send the data to the server
         
-        // Retrive and add post to the posts section, just after the post-cta section (the section this object represents then)
-        // You better let the backend give you the block's html structur after
-        let content = this.textEl.value;
-        let postEl = document.createElement("div");
-        // The cross-validation token inserted by Django
-        let csrf_value= cookies.csrftoken;  // This variable is created early in this script: look at above 
-        postEl.innerHTML = `
-        <article class="post">
-            <div class="post-header">
-            <div class="avatar">
-                <img src=${this.postCTAWrapperEl.querySelector(".avatar img").src} alt="profil">
-            </div>
-            <div>
-                <h4>${document.querySelector(".sidebar .infos h4").textContent}</h4>
-                <p>${new Date().toISOString()}</p>
-            </div>
-            </div>
-            <p class="post-text">
-                ${content}
-            </p>
-            <img src=${this.attachImgEl.src} alt="Post Content" class="post-image" />
-
-            <div class="post-actions">
-                <i class="like-button bi bi-heart-fill"></i>
-                <p class="likes">0</p>
-                <i class="bi bi-eye"></i>
-                <p class="views">0</p>
-                <i class="see-comment-button bi bi-chat-dots"></i>
-            </div>
-
-            <div class="post-comments">
-                <form method="Post" action="{% url "posts:comment-post" id=post.id %}" class="comment-cta">
-                    <input type=hidden name="csrfmiddlewaretoken" value=${csrf_value} />
-                    <div class="avatar post-avatar">
+            postEl.innerHTML = `
+            <article class="post">
+                <div class="post-header">
+                    <div class="avatar">
                         <img src=${this.postCTAWrapperEl.querySelector(".avatar img").src} alt="profil">
                     </div>
-                    <textarea name="content" spellcheck="false" type="text" placeholder="Want to let a comment?"></textarea>
-                    <button type="button" class="button comment-cta-button">Pin</button>
-                </form>
-            </div>
-        </article>
-        `;
-        let feedEl = document.querySelector(".feed");  // the feed represents the block that has the posts, stories, etc. That is the block in the middle of the page
-        feedEl.insertBefore(postEl, this.postCTAWrapperEl.nextElementSibling)
+                    <div>
+                        <h4>${document.querySelector(".sidebar .infos h4").textContent}</h4>
+                        <p>${new Date().toISOString()}</p>
+                    </div>
+                    <i class="bi bi-x-circle-fill delete-post-button" url=${data.delete_url}></i>
+                </div>
+                <p class="post-text">${content}</p> <!-- This has 'white-space: pre-line', be careful then -->`   
+                +
+                ((this.input.value !='')?( `<img src=${this.attachImgEl.src} alt="Post Content" class="post-image" />`):`` )   // Here we add the image tag only if an image exist
+                +
+                `
+                <div class="post-actions">
+                    <i class="like-button bi bi-heart-fill"></i>
+                    <p class="likes">0</p>
+                    <i class="bi bi-eye"></i>
+                    <p class="views">0</p>
+                    <i class="see-comment-button bi bi-chat-dots"></i>
+                </div>
 
-        // We have to link this new post element to a postObject to make it alive
-        new Post(postEl);
+                <div class="post-comments">
+                    <form method="Post" action="{% url "posts:comment-post" id=post.id %}" class="comment-cta">
+                        <input type=hidden name="csrfmiddlewaretoken" value=${csrf_value} />
+                        <div class="avatar post-avatar">
+                            <img src=${this.postCTAWrapperEl.querySelector(".avatar img").src} alt="profil">
+                        </div>
+                        <textarea name="content" spellcheck="false" type="text" placeholder="Want to let a comment?"></textarea>
+                        <button type="button" class="button comment-cta-button">Pin</button>
+                    </form>
+                </div>
+            </article>
+            `;
+            let feedEl = document.querySelector(".feed");  // the feed represents the block that has the posts, stories, etc. That is the block in the middle of the page
+            feedEl.insertBefore(postEl, this.postCTAWrapperEl.nextElementSibling)
 
-        // Clear textarea content and remove the attach
-        this.textEl.value = "";
-        this.discardAttach();
+            // We have to link this new post element to a postObject to make it alive
+            new Post(postEl);
+
+            // Clear textarea content and remove the attach
+            this.textEl.value = "";
+            this.textEl.style.height = 'auto';
+            this.discardAttach();
+        })
+        .catch(error => console.log(error));
     }
 
     /** 
@@ -257,7 +274,6 @@ class PostCTAWrapper {
         // Remove the attachement rendering from the page
         this.attachImgEl.src = "";
         this.attachSection.style.display = "none";
-
     }
 
     /**
@@ -311,7 +327,6 @@ class AddStoryEl{
             body: formData,
         }).then(response => {if(response.ok) return response.json();})
         .then(data => {
-            console.log("Bien dedans!");
             // Once we upload the story, the server will provide us with the the ressource's url, the thumbnail's url, and deletion's url too
             let content_url = data.content_url; 
             let thumbnail_url = data.thumbnail_url;

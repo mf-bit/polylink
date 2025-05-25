@@ -9,14 +9,6 @@
   <title>PolyLink</title>
   <link rel="stylesheet" href={% static "styles/home.css" %} />
   <link rel="stylesheet" href={% static "styles/bootstrap-icons.css" %} />
-  <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
-  <style>
-    @font-face {
-      font-family: "Bootstrap Font";
-      src: url({% static "styles/fonts/bootstrap-icons.woff" %}) format("woff"), 
-          url({% static "styles/fonts/bootstrap-icons.woff2" %}) format("woff2");
-    }
-  </style>
   <script defer src={% static "scripts/home.js" %}></script>
 </head>
 <body>
@@ -64,7 +56,7 @@
         <a href="#"><i class="bi bi-envelope">
             <div class="badge">1</div>
           </i>
-          <p>conversations</p>
+          <p>Messages</p>
         </a>
         <a href="#"><i class="bi bi-people"></i>
           <p>Follows</p>
@@ -81,26 +73,21 @@
 
     <section class="feed">
       <div class="stories">
-        {% comment %} <div> {% endcomment %}
-            <label class="story add-story" for="story-attach" url={% url "stories:story" %}>
-            <img class="cover" src={% url "users:avatar" id=user.id %} alt="cover">
-            <div class="avatar story-avatar">
-              <img src={% url "users:avatar" id=user.id %} alt="profil">
-            </div>
-            <p class="user firstname">Your</p>
-            <p class="user lastname">Story</p>
-            <input type="file" name="story-attach" class="story-attach-input" id="story-attach">
-          </label>
-        {% comment %} </div> {% endcomment %}
+        <div class="story">
+          <img class="cover" src={% url "users:avatar" id=user.id %} alt="cover">
+          <div class="avatar story-avatar">
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
+          </div>
+          <p class="user firstname">Your</p>
+          <p class="user lastname">Story</p>
+        </div>
 
-        {% for story in stories %}
-          <a href={% url "stories:get-story" id=story.id %}>
-            <div class="story">
-              <i class="bi bi-x-circle-fill delete-post-button" url={% url "stories:delete-story" id=story.id %}></i>
-              <img class="cover" src={% url "stories:story-thumbnail" id=story.id %} alt="cover">
-            </div>
-          </a>
-        {% endfor %}
+        <div class="story">
+          <img class="cover" src="images/story-2.jpg" alt="cover">
+          <div class="avatar story-avatar">
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
+          </div>  
+        </div>
       </div>
 
       <form method="POST" action={% url "posts:post" %} class="post-cta-wrapper" enctype="multipart/form-data">
@@ -109,7 +96,7 @@
             <div class="avatar story-avatar">
                 <img src={% url "users:avatar" id=user.id %} alt="profil">
             </div>
-            <textarea spellcheck="false" name="content" placeholder="What's on your mind, {{user.first_name}}?"></textarea>
+            <textarea class="happy" spellcheck="false" name="content" placeholder="What's on your mind, {{user.first_name}}?"></textarea>
             <input type="file" name="image" id="attach">
             <label for="attach" class="attach-image-button">
               <i title="attach an image" class="bi bi-paperclip"></i>
@@ -122,7 +109,7 @@
           </div>
       </form>
       {% for post in posts %}
-        <article class="post">
+          <article class="post">
           <div class="post-header">
             <div class="avatar">
               <img src={% url "users:avatar" id=user.id %} alt="profil">
@@ -134,10 +121,10 @@
             </div>
             <i class="bi bi-x-circle-fill delete-post-button" url={% url "posts:delete-post" id=post.id %}></i>
           </div>
-          <p class="post-text">{{post.content}}</p>  <!-- This has 'white-space: pre-line', be careful then -->
-         {% if post.image %}
-             <img src={% url "posts:post-image" id=post.id %} alt="Post Content" class="post-image" />
-         {% endif %}
+          <p class="post-text">
+            {{post.content}}
+          </p>
+          <img src={% url "posts:post-image" id=post.id %} alt="Post Content" class="post-image" />
           <div class="post-actions">
             <i class="like-button bi bi-heart-fill"></i>
             <p class="likes">{{ post.likes }}</p>
@@ -162,7 +149,9 @@
                   <div class="avatar post-avatar">
                     <img src={% url "users:avatar" id=comment.author %} alt="profil">
                   </div>
-                  <p>{{comment.content}} </p> <!-- This has 'white-space: pre-line', be careful then -->
+                  <p>
+                    {{comment.content}}
+                  </p>
                 </div>
             {% endfor %}
           </div>
@@ -171,52 +160,36 @@
       {% endfor %}
     </section>
 
-    <aside class="inside-conversation">
-      <div class="header">
-        <i class="bi bi-arrow-left go-back-button"></i>
-        <p>{{ user.first_name }} {{ user.last_name }}</p>
-        <div class="avatar message-avatar">
-          <img src={% url "users:avatar" id=user.id %} alt="profil">
+    <aside class="messages">
+      <div class="messages-header">
+        <h3>Messages</h3>
+        <input type="text" placeholder="Search messages" />
+        <div class="tabs">
+          <span class="active">Primary</span>
+          <span>General</span>
+          <span>Requests (7)</span>
         </div>
       </div>
 
-      <div class="body">
-        <div class="left message">
-          <p class="text">
-            Click one of the examples listed below to open the Shuffle Visual Editor with the UI library that uses the selected component. You don't need to remember all CSS classes
-          </p>
-        </div>
-        <div class="right message">
-          <p class="text">
-          Bootstrap 5 is a popular front-end web development framework that provides many useful features and tools to create responsive, modern web applications. One of these features is the ability to create rounded corners on various HTML elements using the border-radius utility class.
-          </p>
-        </div>
-        <div class="left message">
-          <p class="text">
-            Nice
-          </p>
-        </div>
-        <div class="right message">
-          <p class="text">
-            Here is the picture: 👇🏿
-          </p>
-        </div>
-        <div class="right message message-image">
-          <img src={% static "images/feed-5.jpg" %} alt="">
-        </div>
+      <div class="message-list">
+        <div class="message">Edem Quist - Just woke up bruh</div>
+        <div class="message">Franca Deila - Received bruh. Thanks!</div>
+        <div class="message">Jane Doe - ok</div>
+        <div class="message">Daniella Jackson - 2 new messages</div>
+        <div class="message">Juliet Makarey - lol u right</div>
+        <div class="message">Chantel Msiza - Birthday Tomorrow!</div>
       </div>
 
-      <div class="write-message">
-        <label for="attach" class="attach-image-button">
-          <i title="attach an image" class="bi bi-plus-lg"></i>
-        </label>
-        <input type="file" name="image" id="attach">
-        <textarea spellcheck="false" name="message" placeholder="Message..."></textarea>
-        <i title="write emoje" class="bi bi-emoje-smile"></i>
-        {% comment %} <div class="attach-wrapper">
-          <img src="" alt="attach" class="post-attach">
-          <i class="bi bi-x-circle-fill discard-attach"></i>
-        </div> {% endcomment %}
+      <div class="requests">
+        <div class="request">
+          <p>Hajia Bintu (8 mutual friends)</p>
+          <button>Accept</button>
+          <button>Accept</button>
+        </div>
+        <div class="request">
+          <p>Jackline Mensah</p>
+          <button>Accept</button>
+        </div>
       </div>
     </aside>
   </main>

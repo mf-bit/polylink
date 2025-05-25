@@ -12,6 +12,23 @@
   background-color: #988ee0;
 }
 
+/* Scrollbar Track */
+::-webkit-scrollbar {
+    width: 8px;  /* Width for vertical scrollbar */
+    height: 8px; /* Height for horizontal scrollbar */
+}
+
+/* Scrollbar Thumb */
+::-webkit-scrollbar-thumb {
+    background: #6c5ce7; /* Color of scrollbar */
+    border-radius: 50rem; /* Rounded edges */
+}
+
+/* Scrollbar Track (background) */
+::-webkit-scrollbar-track {
+    background: #ddd; /* Track color */
+}
+
 /* Layout */
 body {
   background: #f4f2ff;
@@ -25,6 +42,10 @@ body {
   padding: 1rem 2rem;
   background: white;
   border-bottom: 1px solid #ddd;
+  position: sticky;
+  top: 0px;
+  z-index: 15;
+  height: 71px;
 }
 
 .navbar .logo {
@@ -93,8 +114,8 @@ body {
 
 .avatar:hover{
   border: 1px solid #6c5ce7;
-  box-shadow: 3px 2px 5px#6c5ce7;
-  transform: scale(1.2);
+  box-shadow: 0px 0px 5px#6c5ce7;
+  transform: scale(1.075);
   transform-origin: center;
 }
 
@@ -108,12 +129,15 @@ body {
   display: flex;
   gap: 1rem;
   padding: 1rem 2rem;
+  max-width: 1350px;
+  margin: 0px auto;
+  /* border: 2px solid red; */
 }
 
 /* Sidebar */
 .sidebar {
-  flex: 1;
   max-width: 250px;
+  min-width: 250px;
 }
 
 .sidebar .profile {
@@ -194,8 +218,8 @@ body {
 
 /* Feed */
 .feed {
-  flex: 2;
-  max-width: 750px;
+  flex: 1;
+  max-width: 650px;
 }
 
 .stories {
@@ -203,6 +227,11 @@ body {
   gap: 10px;
   overflow-x: auto;
   margin-bottom: 1rem;
+  flex-wrap: nowrap;
+}
+
+.stories::-webkit-scrollbar{
+  display: none;
 }
 
 .story{
@@ -213,6 +242,25 @@ body {
   font-size: 0.75rem;
   position: relative;
   overflow: hidden;
+}
+
+.story::before{
+  content: "";
+  width: 100%;
+  height: 100%;
+  /* background-color: black; */
+  /* background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.2), rgba(0,0,0,0.8)); */
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.1), rgba(0,0,0,0.1), rgba(0,0,0,0.7));
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.story:hover .cover{
+   transform: scale(1.075);
+   transform-origin: center;
 }
 
 .story .delete-post-button{
@@ -228,11 +276,19 @@ body {
 
 .story:hover .delete-post-button{
   color: white;
-  transform: scale(1.2) rotate(90deg);
+  /* transform: scale(1.2) rotate(90deg); */
+  transform: scale(1.2);
 }
 
 .story:hover .delete-post-button:hover{
   color: red;
+}
+
+
+.story.add-story{
+  flex-shrink: 0;
+  border: 2px solid #6c5ce7c2;
+  position: relative; /* This is for the input element within it */
 }
 
 .story.add-story::before{
@@ -240,15 +296,14 @@ body {
   width: 100%;
   height: 100%;
   /* background-color: black; */
-  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.2), rgba(0,0,0,0.5));
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.2), rgba(0,0,0,0.8));
+  /* background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.2), rgba(0,0,0,0.5)); */
   position: absolute;
   top: 0px;
   left: 0px;
+  transition: all 0.2s ease;
 }
 
-.story.add-story{
-  position: relative; /* This is for the input element within it */
-}
 .story.add-story:hover::before{
   background-color: #6c5ce7;
   font-family: 'Bootstrap Font';  /* The font-face is defined in the html page */
@@ -267,12 +322,19 @@ body {
   width: 0px;
   height: 0px;
   position: absolute;
+  top: -10px;
+}
+
+.story.add-story .story-attach-input:focus{
+  width: 0px;
+  height: 0px;
 }
 
 .story .cover{
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.5s ease;
 }
 
 .story .user, .story .story-avatar{
@@ -281,9 +343,10 @@ body {
 
 .story .user{
   left: 10px;  
-  color: white;
-  font-weight: 520;
+  color: rgb(234, 233, 233);
+  font-weight: 100;
   font-size: 10px;
+  z-index: 5;  /* we want it to be above the ::before which has a dark gradient background */
 }
 .story .firstname{
   bottom: 22px;
@@ -349,7 +412,8 @@ body {
   color: #6c5ce7;
   font-size: 1.3rem;
   font-weight: bold;
-  transition: transform 2s ease-out color 2s ease-out;
+  transition: all 0.1s ease-out;
+  /* transition: transform 2s ease-out, color 2s ease-out; */
   z-index: 10;
 }
 
@@ -483,6 +547,7 @@ body {
 .post-text{
   padding: 0px 0.8rem 1rem 0.8rem;
   line-height: 1.25rem;
+  white-space: pre-line;
 }
 
 .post-image {
@@ -555,56 +620,171 @@ body {
 .post-comment p{
   padding-top: 0.5rem;
   font-size: 0.85rem;
+  white-space: pre-line;
 }
 
-/* Messages */
-.messages {
-  flex: 1;
-  max-width: 300px;
+/* conversations */
+.conversations{
+  background-color: white;
+  border-radius: 15px;
+  min-width: 340px;
+  height: fit-content;
+  padding: 25px 0px 15px 0px;
+  flex: 0;
 }
 
-.messages-header {
+
+.conversations-header {
+  margin-bottom: 1.5rem;
+  padding: 0px 15px;
+}
+
+.conversations-header p{
+  font-size: 1.1rem;
+  font-weight: bold;
   margin-bottom: 1rem;
 }
 
-.messages-header input {
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  margin: 0.5rem 0;
+.conversations-header .search-bar{
+  margin-bottom: 1.2rem;
 }
 
+.tabs{
+  padding-left: 0.1rem;
+
+}
 .tabs span {
-  margin-right: 1rem;
+  margin-right: 0.2rem;
   cursor: pointer;
+  color: #555 ;
+  background-color: #f4f2ff;
+  border-radius: 50rem;
+  padding: 0.3rem 0.8rem;
 }
 
 .tabs .active {
   color: #6c5ce7;
+  background-color: #9186e25c;
   font-weight: bold;
 }
 
-.message-list .message {
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #eee;
+.conversation-list{
+  height: 50vh;
+  min-height: 300px;
+  max-height: 420px;
+  overflow: auto;
+  padding-left: 15px;
+  margin-right: 2px;
 }
 
-.requests .request {
-  background: #eee;
-  padding: 0.5rem;
-  border-radius: 10px;
-  margin-top: 1rem;
+.conversation-list::-webkit-scrollbar {
+    width: 2px;  /* Width for vertical scrollbar */
 }
 
-.requests button {
-  padding: 0.25rem 0.5rem;
-  background: #6c5ce7;
+.conversation-list::-webkit-scrollbar-track {
+    background: #dddddd79; /* Track color */
+    background: transparent;
+}
+
+.conversation{
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.conversation div:nth-child(2){
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.conversation div:nth-child(2) p{
+  font-size: 0.8rem;
+  color: #55555591  
+}
+
+.conversation .infos{
+  flex: 1;
+  text-align: end;
+  margin-right: 13px;
+}
+
+.conversation .infos p:first-child{
+  font-size: 0.85rem;
+  color: #988ee0;
+}
+
+.conversation span{
+  font-size: 0.65rem;
   color: white;
-  border: none;
+  background-color: #6c5ce7;
+  border-radius: 50rem;
+  padding: 0.1rem 0.3rem;
+}
+
+/* Messages */
+.inside-conversation{
+  background-color: white;
+  border-radius: 15px;
+  min-width: 340px;
+  height: fit-content;
+  padding: 0.7rem 2rem 1rem 2rem;
+  flex: 0;
+  margin-bottom: 5px;
+}
+
+.inside-conversation .message-avatar{
+  width: 25px;
+  height: 25px;
+}
+
+.inside-conversation .header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid grey;
+  padding-bottom: 0.7rem;
+  margin-bottom: 5px;
+}
+
+.inside-message .body{
+  overflow: auto;
+}
+
+.message{
+  padding: 0.8rem 1rem;
+  /* border-radius: 50rem 50rem 0px 50rem; */
+  margin-bottom: 10px;
+  max-width: 80%; 
+}
+
+.message.message-image{
+  padding: 0px;
+  background-color: transparent !important;
+}
+
+.message.right{
+  border-radius: 2rem 2rem 0px 2rem;
+  float: right;
+  clear: both;
+  background-color: #6c5ce7;
+  color: white; 
+}
+
+.message.left{
+  border-radius: 2rem 2rem 2rem 0px ;
+  float: left;
+  background-color: #d2d2d7;
+  color: rgb(66, 66, 66); 
+}
+
+.message.message-image img{
+  object-fit: cover;
+  width: 100%;
+  height: auto;
   border-radius: 10px;
-  margin-right: 0.5rem;
-  cursor: pointer;
 }
 
 /* Responsive */
@@ -620,7 +800,7 @@ body {
     max-width: 100%;
   }
 
-  .messages {
+  .conversations {
     order: -1;
     max-width: 100%;
   }
