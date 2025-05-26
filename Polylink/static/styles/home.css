@@ -29,6 +29,10 @@
     background: #ddd; /* Track color */
 }
 
+textarea::-webkit-scrollbar{
+  display: none;
+}
+
 /* Layout */
 body {
   background: #f4f2ff;
@@ -376,6 +380,10 @@ body {
   border-radius: 20px;  /* update for if changed */
 }
 
+.post-cta-wrapper .post-cta-avatar{
+  width: 35px;
+  height: 35px;
+}
 .post-cta-wrapper .attach-wrapper{
   position: relative;
   width: fit-content;
@@ -405,7 +413,7 @@ body {
   background-color: rgba(255, 255, 255, 0.382);
 }
 
-.post-cta-wrapper .attach-wrapper .discard-attach{  /* the cancel button to trigger to discuard the attachment selection */
+.post-cta-wrapper .attach-wrapper .discard-attach-button{  /* the cancel button to trigger to discuard the attachment selection */
   position: absolute;
   left: -8%;
   top: -17%;
@@ -417,7 +425,7 @@ body {
   z-index: 10;
 }
 
-.post-cta-wrapper .attach-wrapper .discard-attach:hover{  /* the cancel button to trigger to discuard the attachment selection */
+.post-cta-wrapper .attach-wrapper .discard-attach-button:hover{  /* the cancel button to trigger to discuard the attachment selection */
   transform: scale(1.1);
   transform-origin: center;
   color: rgb(255, 64, 0);
@@ -426,7 +434,7 @@ body {
 .post-cta, .comment-cta{
   width: 100%;
   height: fit-content;
-  padding: 0.5rem 1rem;
+  padding: 0.3rem 1rem;
   border-radius: 20px;
   background-color: white;
   display: flex;
@@ -445,6 +453,7 @@ body {
   height: 28px;
   padding: 0rem 1.5rem;
   font-size: 0.9rem;
+  margin-top: 0.2rem;
 }
 
 .comment-cta .comment-cta-button{
@@ -456,21 +465,21 @@ body {
 .post-cta textarea, .comment-cta textarea{
   flex-grow: 1;
   resize: none;
-  padding: 0.5rem 1.5rem 0px 1.5rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0px;
+  padding: 0px 1.5rem 0px 1.5rem;
   border-radius: 12px;
-  /* border: 1px solid rgb(85, 85, 85, 0.1); */
+  height: fit-content;
   border: 1px solid transparent;
   line-height: 1.4rem;
 }
 
 .comment-cta textarea{
   border: 1px solid #ccc;
-  padding-top: 0.45rem;
-  padding-left: 0.7rem;
-  padding-right: 0.5rem;
-  padding-bottom: 0.05rem;
+  padding: 0.45rem 0.5rem 0.05rem 0.7rem ;
   font-size: 0.85rem;
   line-height: 1.1rem;
+  margin-top: 0px;
 }
 
 .post-cta textarea:focus, .comment-cta textarea:focus{
@@ -488,6 +497,7 @@ body {
   transform: rotate(45deg);
   transform-origin: center;
   margin-right: 1.2rem;
+  margin-top: 0.2rem;
   position: relative;
   top: 0.15rem;
   transition: transform 0.2s ease;
@@ -728,11 +738,14 @@ body {
 .inside-conversation{
   background-color: white;
   border-radius: 15px;
-  min-width: 340px;
-  height: fit-content;
-  padding: 0.7rem 2rem 1rem 2rem;
+  min-width: 340px;   /* Make it the same as the .conversations height later */
+  height: 590.424px; /* Make it the same as the .conversations height later */
+  /* padding: 0.7rem 2rem 1rem 2rem; */
+  padding: 0.7rem 0px 10px 0px;
   flex: 0;
   margin-bottom: 5px;
+  display: flex;
+  flex-direction: column;
 }
 
 .inside-conversation .message-avatar{
@@ -749,15 +762,30 @@ body {
   margin-bottom: 5px;
 }
 
-.inside-message .body{
+.inside-conversation .body{
   overflow: auto;
+  padding: 0px 15px
+}
+
+.inside-conversation .body::-webkit-scrollbar {
+    width: 2px;  /* Width for vertical scrollbar */
+}
+
+.inside-conversation .body::-webkit-scrollbar-track {
+    background: #dddddd79; /* Track color */
+    background: transparent;
 }
 
 .message{
   padding: 0.8rem 1rem;
   /* border-radius: 50rem 50rem 0px 50rem; */
-  margin-bottom: 10px;
-  max-width: 80%; 
+  margin-bottom: 1.5rem;
+  max-width: 90%; 
+}
+
+.message .text{
+  font-size: 0.9rem;
+  font-family:Verdana, Geneva, Tahoma, sans-serif;
 }
 
 .message.message-image{
@@ -786,6 +814,141 @@ body {
   height: auto;
   border-radius: 10px;
 }
+
+/* ========================================================================*/
+/* ========================================================================*/
+/* ========================================================================*/
+/* .write-message{
+  width: 100%;
+  height: fit-content;
+  background-color: white;
+  border-radius: 20px;
+} */
+
+        .post-cta-wrapper .attach-wrapper{
+          position: relative;
+          width: fit-content;
+          margin-left: 8%;
+          margin-bottom: 0.25rem;
+          position: relative; 
+          display: none;
+        }
+
+        .post-cta-wrapper img.post-attach{
+          width: 3.125rem; /* 50px if 1rem=16px*/ 
+          height: 3.125rem;
+          object-fit: cover;
+          border-radius: 20%;
+        }
+
+        .post-cta-wrapper .attach-wrapper::after{
+          content: "";
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+        }
+
+        .post-cta-wrapper .attach-wrapper:hover::after{
+          background-color: rgba(255, 255, 255, 0.382);
+        }
+
+        .post-cta-wrapper .attach-wrapper .discard-attach-button{  /* the cancel button to trigger to discuard the attachment selection */
+          position: absolute;
+          left: -8%;
+          top: -17%;
+          color: #6c5ce7;
+          font-size: 1.3rem;
+          font-weight: bold;
+          transition: all 0.1s ease-out;
+          /* transition: transform 2s ease-out, color 2s ease-out; */
+          z-index: 10;
+        }
+
+        .post-cta-wrapper .attach-wrapper .discard-attach-button:hover{  /* the cancel button to trigger to discuard the attachment selection */
+          transform: scale(1.1);
+          transform-origin: center;
+          color: rgb(255, 64, 0);
+        }
+
+.write-message{
+  width: 90%;
+  height: fit-content;
+  /* padding: 0.5rem 1rem; */
+  border-radius: 20px;
+  background-color: #f4f2ff;
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  margin: 10px auto 0px auto;
+}
+
+.write-message .write-emoji{
+  width: fit-content;
+  height: fit-content;
+  transition: transform 0.2s ease;
+  border-radius: 50rem;
+  padding: 3px 4px;
+  margin: 0px 10px 10px 5px;
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.write-message .write-emoji:hover{
+  transform: scale(1.1);
+  transform-origin: center;
+}
+
+.write-message textarea{
+  flex-grow: 1;
+  resize: none;
+  padding: 0.5rem 0.5rem 0px 0.5rem;
+  margin-bottom: 0;
+  margin-right: 0px;
+  border-radius: 12px;
+  /* border: 1px solid red; */
+  border: 1px solid transparent;
+  line-height: 1.4rem;
+  background-color: #f4f2ff;
+  max-height: 400px;
+}
+
+.write-message textarea:focus{
+  outline: none;
+}
+
+.write-message input#attach{   /* this is the input element tied to the attach-image button: we will simply make it tiny and hide */
+  visibility: hidden;
+  width: 1px;
+  height: 1px;
+}
+
+.write-message .attach-doc-button{
+  width: fit-content;
+  height: fit-content;
+  /* margin-right: 1.2rem; */
+  transition: transform 0.2s ease;
+  background-color: #6c5ce7;
+  border-radius: 50rem;
+  padding: 3px 4px;
+  margin: 0px 5px 10px 10px;
+}
+
+.write-message .attach-doc-button i{
+  font-size: 1rem;
+  color: white;
+}
+
+.write-message .attach-doc-button:hover{
+  transform: scale(1.1);
+  transform-origin: center;
+}
+
+/* ========================================================================*/
+/* ========================================================================*/
+/* ========================================================================*/
+/* ========================================================================*/
 
 /* Responsive */
 @media (max-width: 1024px) {

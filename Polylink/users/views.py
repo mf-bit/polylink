@@ -124,10 +124,6 @@ class ExploreView(View):
                 {"$project": {"_id":0, "id": "$_id", 'author': 1}},
             ]
             stories = db.db.stories.aggregate(pipeline).to_list() # We will need an iterable in the template
-
-            print('========================')
-            print(posts[0]['content'])
-            print('========================')
             return render(request, "explore.html", {"user": user, "posts": posts, "stories": stories})  
     
 

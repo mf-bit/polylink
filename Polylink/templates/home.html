@@ -106,7 +106,7 @@
       <form method="POST" action={% url "posts:post" %} class="post-cta-wrapper" enctype="multipart/form-data">
         {% csrf_token %}
           <div class="post-cta">
-            <div class="avatar story-avatar">
+            <div class="avatar post-cta-avatar">
                 <img src={% url "users:avatar" id=user.id %} alt="profil">
             </div>
             <textarea spellcheck="false" name="content" placeholder="What's on your mind, {{user.first_name}}?"></textarea>
@@ -118,7 +118,7 @@
           </div>
           <div class="attach-wrapper">
             <img src="" alt="attach" class="post-attach">
-            <i class="bi bi-x-circle-fill discard-attach"></i>
+            <i class="bi bi-x-circle-fill discard-attach-button"></i>
           </div>
       </form>
       {% for post in posts %}
@@ -171,7 +171,7 @@
       {% endfor %}
     </section>
 
-    <aside class="inside-conversation">
+    <div class="inside-conversation">
       <div class="header">
         <i class="bi bi-arrow-left go-back-button"></i>
         <p>{{ user.first_name }} {{ user.last_name }}</p>
@@ -207,18 +207,18 @@
       </div>
 
       <div class="write-message">
-        <label for="attach" class="attach-image-button">
-          <i title="attach an image" class="bi bi-plus-lg"></i>
+        <label for="attach" class="attach-doc-button">
+          <i title="attach an document" class="bi bi-plus-lg"></i>
         </label>
         <input type="file" name="image" id="attach">
         <textarea spellcheck="false" name="message" placeholder="Message..."></textarea>
-        <i title="write emoje" class="bi bi-emoje-smile"></i>
+        <i title="write-emoji" class="bi bi-emoji-smile write-emoji"></i>
         {% comment %} <div class="attach-wrapper">
           <img src="" alt="attach" class="post-attach">
-          <i class="bi bi-x-circle-fill discard-attach"></i>
+          <i class="bi bi-x-circle-fill discard-attach-button"></i>
         </div> {% endcomment %}
       </div>
-    </aside>
+    </div>
   </main>
 </body>
 </html>

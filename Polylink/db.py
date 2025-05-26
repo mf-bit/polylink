@@ -102,12 +102,12 @@ def output_dict(dic):
     print("}")
 
 
-with open("bg.png", 'rb') as file:
-    img_bytes = file.read()
-    img_format = "png"
-    db.users.update_one({"username": 'matarfaly'}, {'$set': {'avatar': Binary(img_bytes), 'avatar_format': img_format}})
+# with open("bg.png", 'rb') as file:
+#     img_bytes = file.read()
+#     img_format = "png"
+#     db.users.update_one({"username": 'matarfaly'}, {'$set': {'avatar': Binary(img_bytes), 'avatar_format': img_format}})
 
-with open("laye.jpg", 'rb') as file:
-    img_bytes = file.read()
-    img_format = "jpg"
-    db.users.update_one({"username": 'laye'}, {'$set': {'avatar': Binary(img_bytes), 'avatar_format': img_format}})
+# with open("laye.jpg", 'rb') as file:
+#     img_bytes = file.read()
+#     img_format = "jpg"
+#     db.users.update_one({"username": 'laye'}, {'$set': {'avatar': Binary(img_bytes), 'avatar_format': img_format}})

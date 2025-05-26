@@ -24,7 +24,7 @@ let cookies = getCookies();
 class Post {
     /**
      * Instanciates a new post object: yeah I know you know what it does, I just do not care 😒!
-     * @param {HttpElement} post The Http element representing the post.
+     * @param {HTMLElement} post The Http element representing the post.
      */
     constructor(post) {
         this.postElement = post;
@@ -139,7 +139,7 @@ class Post {
 class PostCTAWrapper {
     /**
      * Instantiates a new object. I can resist: It is stronger than me commenting even if I know you know 😭
-     * @param {HttpElement} postCTAWrapper The block representing the post call-to-action section.
+     * @param {HTMLElement} postCTAWrapper The block representing the post call-to-action section.
      */
     constructor(postCTAWrapper) {
         this.postCTAWrapperEl = postCTAWrapper;  // this is a form by the way
@@ -160,7 +160,7 @@ class PostCTAWrapper {
         this.attachImgEl = postCTAWrapper.querySelector(".attach-wrapper img");
 
         /** The button to click on in order to discard a chosen attachement */
-        this.discardAttachButton = postCTAWrapper.querySelector(".attach-wrapper .discard-attach");
+        this.discardAttachButton = postCTAWrapper.querySelector(".attach-wrapper .discard-attach-button");
         this.discardAttachButton.addEventListener("click", this.discardAttach.bind(this));
     }
 
@@ -296,7 +296,7 @@ class PostCTAWrapper {
 class AddStoryEl{
     /**
      * Instantiate a new element.
-     * @param {HttpElement} addStoryElement The html block that represents the story block to trigger in order to add a story.
+     * @param {HTMLElement} addStoryElement The html block that represents the story block to trigger in order to add a story.
      */
     constructor(addStoryElement){
         this.addStoryEl = addStoryElement;
@@ -355,7 +355,7 @@ class AddStoryEl{
 class Story{
     /**
      * Instantiate a new element.
-     * @param {HttpElement} story The html block that represents the story block.
+     * @param {HTMLElement} story The html block that represents the story block.
      */
     constructor(story){
         this.story = story;
@@ -383,16 +383,81 @@ class Story{
     }
 }
 
+/**
+ * This represents a conversation element 
+ */
+class Conversation{
+    /**
+     * Initializes a new conversation object
+     * @param {HTMLElement} element The html element that represents the conversation.
+     */
+    constructor(element){
+        this.conversationEl = element;
+        this.unreadMessageEl = this.element.querySelector('.infos span');
+        this.lastMessageViewEl = this.element.querySelector('.last-message-view');  
+        this.lastMessageDateEl = this.element.querySelector('.infos p');
+        /** The endpoint to query in order the load the messages */
+        this.endpoint = this.conversationEl.attributes.url.value;
+        /** The block containing the messages of the conversation */
+        this.insideConversation = this.conversationEl.querySelector('inside-conversation');
+
+        this.init();
+    }
+        /**
+         * This initialize the elements by attaching events to them
+         */
+        init(){
+            this.conversationEl.addEventListener('click', this.loadConversation.bind(this));
+        }
+
+        /**
+         * Loads the messages of the conversation
+         */
+        loadConversation(){
+            fetch(this.endpoint, {
+                method: 'GET',
+                headers: {
+                    "X-CSRFToken": cookies.csrftoken,
+                }
+            })
+            .then(response => response.text())
+            .then(data => {
+                this.insideConversation.outerHTML = data;
+            })
+            .catch(error => console(`Loading message for the conversation fails: ${error}`));
+        }
+}
+
+// /**
+//  * This represents a textarea element.
+//  */
+// class Textarea{
+//     /**
+//      * Initializes a new textarea element.
+//      * @param {HTMLElement} element The element representing the textarea.
+//      */
+//     constructor(element){
+//         this.textareaEl = element;
+//         this.numberOfLineFeed = 0;
+//         this.textareaEl.addEventListener("input", () => this.adjustHeight.bind(this));
+//     }
+
+//     adjustHeight(){
+
+//     }
+
+// }
+
 // ===================================================================================
 // ===================================================================================
 
 // Handle the autoresize textareas
 const postInputEls = document.querySelectorAll("textarea");
 postInputEls.forEach((postInputEl) => {
-    postInputEl.addEventListener("input", () => {
+    postInputEl.addEventListener("input", (event) => {
         postInputEl.style.height = "auto";
-        postInputEl.style.height = (postInputEl.scrollHeight + 2) + "px";
-    }
+        postInputEl.style.height = (postInputEl.scrollHeight) + "px";
+     }
     )
 })
 
@@ -412,6 +477,10 @@ stories.forEach((story)=>{
 // Create a addStory element object
 let story = document.querySelector(".feed .story.add-story");
 new AddStoryEl(story);
+
+// Creating the conversation objects
+let conversations = document.querySelector('.conversation');
+conversations.forEach(con => new Conversation(con));
 
 
 // const file = document.querySelector(".post-cta input").files[0];
