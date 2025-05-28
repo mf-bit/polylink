@@ -62,3 +62,41 @@ button {
 button:hover {
     background-color: #5a67d8;
 }
+
+/* Remplacez l'ancien CSS des form-links par celui-ci */
+.form-links {
+    text-align: center;
+    margin-top: 25px;
+    padding: 20px 0 10px 0;
+    border-top: 1px solid #eee;
+}
+
+.form-links a {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin: 5px 8px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.form-links a:hover {
+    color: white;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.divider {
+    display: none;
+}
+
+.form-links a:first-child {
+    margin-bottom: 8px;
+}

@@ -3,7 +3,7 @@ import pymongo
 import bcrypt
 from bson import Binary, ObjectId
 from django.http import HttpRequest
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 # Create a new connection to the polylink database
 con = MongoClient("mongodb://localhost:27017")
@@ -101,13 +101,122 @@ def output_dict(dic):
         print(f"{key}: {value}")
     print("}")
 
+# polylink/db.py
 
-# with open("bg.png", 'rb') as file:
-#     img_bytes = file.read()
-#     img_format = "png"
-#     db.users.update_one({"username": 'matarfaly'}, {'$set': {'avatar': Binary(img_bytes), 'avatar_format': img_format}})
+def create_notification(recipient_id, actor_id, post_id, action_type, content=None):
+    """Crée une notification pour un utilisateur"""
+    actor = db.users.find_one({"_id": actor_id})
+    if not actor:
+        return False
+    
+    # Vérifier si une notification similaire existe déjà dans les dernières minutes
+    existing_notification = db.notifications.find_one({
+        "recipient_id": recipient_id,
+        "actor_id": actor_id,
+        "post_id": post_id,
+        "action_type": action_type,
+        "timestamp": {
+            "$gte": datetime.now(timezone.utc) - timedelta(minutes=5)
+        }
+    })
+    
+    if existing_notification:
+        return True  # Éviter les doublons de notifications
+    
+    # Récupérer le contenu du post pour les likes
+    post_content = None
+    if action_type == "like":
+        post = db.posts.find_one({"_id": ObjectId(post_id)})
+        if post:
+            post_content = post.get("content", "")[:100]  # Limiter à 100 caractères
+    
+    notification_data = {
+        "recipient_id": recipient_id,
+        "actor_id": actor_id,
+        "actor_username": actor["username"],
+        "post_id": post_id,
+        "action_type": action_type,
+        "timestamp": datetime.now(timezone.utc),
+        "read": False
+    }
+    
+    # Ajouter le contenu approprié selon le type d'action
+    if action_type == "comment" and content:
+        notification_data["content"] = content
+    elif action_type == "like" and post_content:
+        notification_data["content"] = post_content
+    
+    db.notifications.insert_one(notification_data)
+    return True
 
-# with open("laye.jpg", 'rb') as file:
-#     img_bytes = file.read()
-#     img_format = "jpg"
-#     db.users.update_one({"username": 'laye'}, {'$set': {'avatar': Binary(img_bytes), 'avatar_format': img_format}})
+def get_user_notifications(user_id, page=1, per_page=10):
+    """Récupère les notifications d'un utilisateur avec pagination"""
+    skip = (page - 1) * per_page
+    
+    # Compter le nombre total de notifications non lues
+    unread_count = db.notifications.count_documents({
+        "recipient_id": user_id,
+        "read": False
+    })
+    
+    # Récupérer les notifications paginées
+    notifications = list(db.notifications.find({"recipient_id": user_id})
+        .sort("timestamp", pymongo.DESCENDING)
+        .skip(skip)
+        .limit(per_page))
+    
+    # Conversion des ObjectId en strings
+    for notif in notifications:
+        notif["id"] = str(notif["_id"])
+        notif["post_id"] = str(notif["post_id"])
+        notif["actor_id"] = str(notif["actor_id"])
+    
+    return {
+        "notifications": notifications,
+        "unread_count": unread_count,
+        "has_more": len(notifications) == per_page
+    }
+
+def mark_notification_as_read(notification_id):
+    """Marque une notification comme lue"""
+    result = db.notifications.update_one(
+        {"_id": ObjectId(notification_id)},
+        {"$set": {"read": True}}
+    )
+    return result.modified_count > 0
+
+def mark_all_notifications_as_read(user_id):
+    """Marque toutes les notifications d'un utilisateur comme lues"""
+    result = db.notifications.update_many(
+        {
+            "recipient_id": user_id,
+            "read": False
+        },
+        {"$set": {"read": True}}
+    )
+    return result.modified_count
+
+def get_notification_preview(notification_id):
+    """Récupère un aperçu de la notification avec les détails du post associé"""
+    notification = db.notifications.find_one({"_id": ObjectId(notification_id)})
+    if not notification:
+        return None
+        
+    post = db.posts.find_one({"_id": ObjectId(notification["post_id"])})
+    if not post:
+        return None
+        
+    return {
+        "notification": {
+            "id": str(notification["_id"]),
+            "actor_username": notification["actor_username"],
+            "action_type": notification["action_type"],
+            "timestamp": notification["timestamp"],
+            "read": notification["read"]
+        },
+        "post": {
+            "id": str(post["_id"]),
+            "content": post.get("content", ""),
+            "image": bool(post.get("image", False))
+        }
+    }

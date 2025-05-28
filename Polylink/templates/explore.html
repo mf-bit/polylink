@@ -56,11 +56,59 @@
         </a>
         <!-- <a href="#">Notifications <span class="badge">9+</span></a> -->
         <!-- <a href="#">Message <span class="badge">6</span></a> -->
-        <a href="#"><i class="bi bi-bell">
-            <div class="badge">9+</div>
-          </i>
-          <p>Notifications</p>
-        </a>
+        <!-- Section notifications dans la navigation -->
+        <div class="nav-item notifications-container">
+            <a href="#" class="notifications-link nav-link">
+                <i class="bi bi-bell"></i>
+                {% if notifications|length > 0 %}
+                    <span class="badge">{{ notifications|length }}</span>
+                {% endif %}
+                <p>Notifications</p>
+            </a>
+
+            <!-- Dropdown des notifications -->
+            <div class="notifications-dropdown">
+                <div class="notifications-header">
+                    <h4>Notifications récentes</h4>
+                    {% if notifications|length > 0 %}
+                        <form method="POST" action="{% url 'users:mark-all-read' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="mark-all-read">Tout marquer comme lu</button>
+                        </form>
+                    {% endif %}
+                </div>
+
+                <div class="notifications-list">
+                    {% if notifications|length > 0 %}
+                        {% for notif in notifications %}
+                        <div class="notification-item {% if not notif.read %}unread{% endif %}">
+                            <img src="{% url 'users:avatar' id=notif.actor_id %}" class="notification-avatar" alt="Avatar">
+                            <div class="notification-content">
+                                <p>
+                                    <strong>@{{ notif.actor_username }}</strong> a
+                                    {% if notif.action_type == "like" %}
+                                        aimé
+                                    {% elif notif.action_type == "comment" %}
+                                        commenté
+                                    {% else %}
+                                        interagi avec
+                                    {% endif %}
+                                    votre publication
+                                </p>
+                                <small>{{ notif.timestamp|date:"H:i - d M Y" }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="notification-item">
+                            <div class="notification-content" style="text-align: center; padding: 2rem;">
+                                <p style="color: #666;">Aucune notification pour le moment</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
         <a href="#"><i class="bi bi-envelope">
             <div class="badge">1</div>
           </i>

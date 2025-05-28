@@ -3,7 +3,11 @@ from django.views import View
 from . import forms
 import db
 import bson
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
+import bson
+from django.http import HttpResponse, HttpRequest, HttpResponseNotFound, HttpResponseBadRequest
+from django.http import JsonResponse
+from django.contrib.auth import get_user
 
 class HomeView(View):
     def get(self, request:HttpRequest):
@@ -42,21 +46,34 @@ class HomeView(View):
             ]
 
             # Fetch all the posts of the user
-            posts = list(db.db.posts.aggregate(pipeline)) # We going to iterate 'posts' and 'posts.comments' in the template: we need a iterable then, not a cursor object from Mongo
+            posts = list(db.db.posts.aggregate(pipeline))
 
             for post in posts:
                 post["id"] = str(post["_id"])
-                post["comments"] = list(post["comments"])  # In the same way, we need 'posts.comments' as an iterable in the template
+                post["comments"] = list(post["comments"])
             
-            # Retrive all the stories from the database: note that at this stage, we only need the story id
+            # Retrive all the stories from the database
             pipeline = [
                 {"$match": {"author": user["_id"]}},
                 {"$sort": {"date": -1}},
                 {"$project": {"_id":1, "id": "$_id"}},
             ]
-            stories = db.db.stories.aggregate(pipeline).to_list() # We will need an iterable in the template
-            return render(request, "home.html", {"user": user, "posts": posts, "stories": stories})  
-    
+            stories = db.db.stories.aggregate(pipeline).to_list()
+
+            # Récupérer les notifications avec pagination
+            page = int(request.GET.get('page', 1))
+            notifications_data = db.get_user_notifications(user["_id"], page=page)
+
+            return render(request, "home.html", {
+                "user": user, 
+                "posts": posts, 
+                "stories": stories, 
+                "notifications": notifications_data["notifications"],
+                "unread_notifications_count": notifications_data["unread_count"],
+                "has_more_notifications": notifications_data["has_more"],
+                "current_page": page
+            })
+
 class ExploreView(View):
     def get(self, request:HttpRequest):
         # Retrive the delicious session_id cookie
@@ -180,9 +197,68 @@ class RegisterView(View):
             print("}")
             return redirect("users:register")
 
+
+
+
 class AvatarView(View):
-    def get(self, request, id:str):
-        user = db.db.users.find_one({"_id": bson.ObjectId(id)})
-        img_bytes = bytes(user["avatar"])
-        content_type = f"image/{user["avatar_format"]}"
-        return HttpResponse(content=img_bytes, content_type=content_type)
+    def get(self, request, id: str):
+        try:
+            user = db.db.users.find_one({"_id": bson.ObjectId(id)})
+            if not user:
+                return HttpResponseNotFound("User not found")
+            
+            avatar_data = user.get("avatar")
+            avatar_format = user.get("avatar_format")
+            
+            if not avatar_data or not avatar_format:
+                return HttpResponseNotFound("Avatar not found")
+            
+            img_bytes = bytes(avatar_data)
+            content_type = f"image/{avatar_format}"
+            return HttpResponse(img_bytes, content_type=content_type)
+        
+        except bson.errors.InvalidId:
+            return HttpResponseBadRequest("Invalid user ID")
+
+
+class MarkNotificationReadView(View):
+    def post(self, request, notification_id):
+        user = db.get_user(request)
+        if not user:
+            return JsonResponse({"success": False, "error": "Non authentifié"}, status=401)
+
+        if db.mark_notification_as_read(notification_id):
+            # Récupérer le nouveau compte de notifications non lues
+            unread_count = db.db.notifications.count_documents({
+                "recipient_id": user["_id"],
+                "read": False
+            })
+            return JsonResponse({
+                "success": True,
+                "unread_count": unread_count
+            })
+        return JsonResponse({"success": False, "error": "Notification non trouvée"}, status=404)
+
+class MarkAllNotificationsReadView(View):
+    def post(self, request):
+        user = db.get_user(request)
+        if not user:
+            return JsonResponse({"success": False, "error": "Non authentifié"}, status=401)
+
+        marked_count = db.mark_all_notifications_as_read(user["_id"])
+        return JsonResponse({
+            "success": True,
+            "marked_count": marked_count,
+            "unread_count": 0
+        })
+
+class GetNotificationPreviewView(View):
+    def get(self, request, notification_id):
+        user = db.get_user(request)
+        if not user:
+            return JsonResponse({"success": False, "error": "Non authentifié"}, status=401)
+
+        preview = db.get_notification_preview(notification_id)
+        if preview:
+            return JsonResponse({"success": True, "data": preview})
+        return JsonResponse({"success": False, "error": "Notification ou post non trouvé"}, status=404)

@@ -1,16 +1,15 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Register</title>
-    <link rel="stylesheet" href={% static "styles/users/register.css" %}>
+    <link rel="stylesheet" href="{% static 'styles/users/register.css' %}">
 </head>
 <body>
     <div class="login-container">
         <h2>Create Account</h2>
-        <form action="{% url "users:register" %}" method="post">
+        <form action="{% url 'users:register' %}" method="post">
             {% csrf_token %}
             <div class="input-group">
                 <label for="firstname">First Name</label>
@@ -34,6 +33,14 @@
             </div>
             <button type="submit">Register</button>
         </form>
+        
+        <div class="form-links">
+            <a href="{% url 'users:login' %}">Already have an account? Login</a>
+            <div class="divider">•</div>
+            {% comment %} <a href="{% url 'users:forgot_password' %}">Forgot Password?</a> {% endcomment %}
+            <a href="#">Forgot Password?</a>
+
+        </div>
     </div>
 </body>
 </html>

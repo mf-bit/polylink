@@ -1,11 +1,10 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
-    <link rel="stylesheet" href="{% static "styles/users/login.css" %}">
+    <link rel="stylesheet" href="{% static 'styles/users/login.css' %}">
 </head>
 <body>
     <div class="login-container">
@@ -22,6 +21,12 @@
             </div>
             <button type="submit">Sign In</button>
         </form>
+        
+        <div class="form-links">
+            <a href="{% url 'users:register' %}">Don't have an account? Register</a>
+            <div class="divider">•</div>
+            <a href="#">Forgot Password?</a>
+        </div>
     </div>
 </body>
 </html>

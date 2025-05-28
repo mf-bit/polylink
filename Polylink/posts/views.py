@@ -16,7 +16,7 @@ class PostView(View):
             "author": bson.ObjectId(user_id),
             "content": content,
             "date": datetime.now(timezone.utc),
-            "likes": 0,
+            "likes": [],
             "views": 0,
         })
 
@@ -54,21 +54,112 @@ class PostImageView(View):
         content_type = f"image/{post["image_format"]}"
         return HttpResponse(content=img_bytes, content_type=content_type)
     
+# polylink/posts/views.py
 class LikeView(View):
-    def get(self, request, id:str):
-        pass
-
-class CommentView(View):
-    def post(self, request: HttpRequest, id:str):
-        # Retreive the user
+    def get(self, request, id: str):
         user_id = db.get_user_id(request)
-        db.db.comments.insert_one({
-            "content": request.POST.get("content"),
-            "date": datetime.now(timezone.utc),
-            "post": bson.ObjectId(id),
-            "author": user_id,
-        })
+        if not user_id:
+            return JsonResponse({"error": "Unauthorized"}, status=401)
 
-        response = HttpResponse()
-        response.status_code = 204  # No data is being return
-        return response
+        try:
+            user_id_obj = bson.ObjectId(user_id)
+            post_id_obj = bson.ObjectId(id)
+            post = db.db.posts.find_one({"_id": post_id_obj})
+            
+            if not post:
+                return JsonResponse({"error": "Post introuvable"}, status=404)
+
+            # Vérifier si l'utilisateur a déjà liké
+            if user_id_obj in post.get("likes", []):
+                return JsonResponse({"error": "Déjà liké"}, status=400)
+
+            # Ajouter le like
+            db.db.posts.update_one(
+                {"_id": post_id_obj},
+                {"$addToSet": {"likes": user_id_obj}}
+            )
+
+            # Créer une notification
+            db.create_notification(
+                recipient_id=post["author"],
+                actor_id=user_id_obj,
+                post_id=post_id_obj,
+                action_type="like"
+            )
+
+            return JsonResponse({"success": True})
+
+        except bson.errors.InvalidId:
+            return JsonResponse({"error": "ID invalide"}, status=400)
+            
+class CommentView(View):
+    def post(self, request: HttpRequest, id: str):
+        user_id = db.get_user_id(request)
+        if not user_id:
+            return JsonResponse({"error": "Unauthorized"}, status=401)
+
+        try:
+            user_id_obj = bson.ObjectId(user_id)
+            post_id_obj = bson.ObjectId(id)
+            
+            # Insérer le commentaire
+            db.db.comments.insert_one({
+                "content": request.POST.get("content"),
+                "date": datetime.now(timezone.utc),
+                "post": post_id_obj,
+                "author": user_id_obj,
+            })
+
+            # Récupérer le post pour obtenir l'auteur
+            post = db.db.posts.find_one({"_id": post_id_obj})
+            if post:
+                db.create_notification(
+                    recipient_id=post["author"],
+                    actor_id=user_id_obj,
+                    post_id=post_id_obj,
+                    action_type="comment"
+                )
+
+            return HttpResponse(status=204)
+
+        except bson.errors.InvalidId:
+            return JsonResponse({"error": "ID invalide"}, status=400)
+
+class PostDetailView(View):
+    def get(self, request, id: str):
+        user_id = db.get_user_id(request)
+        if not user_id:
+            return JsonResponse({"error": "Unauthorized"}, status=401)
+
+        try:
+            post_id_obj = bson.ObjectId(id)
+            post = db.db.posts.find_one({"_id": post_id_obj})
+            
+            if not post:
+                return JsonResponse({"error": "Post introuvable"}, status=404)
+            
+            # Récupérer les informations de l'auteur
+            author = db.db.users.find_one({"_id": post["author"]})
+            
+            # Préparer les données du post
+            post_data = {
+                "id": str(post["_id"]),
+                "content": post["content"],
+                "date": post["date"].strftime("%d/%m/%Y %H:%M"),
+                "likes_count": len(post.get("likes", [])),
+                "views": post.get("views", 0),
+                "has_image": "image" in post,
+                "author": {
+                    "id": str(author["_id"]),
+                    "username": author["username"],
+                    "first_name": author["first_name"],
+                    "last_name": author["last_name"]
+                }
+            }
+            
+            return JsonResponse(post_data)
+            
+        except bson.errors.InvalidId:
+            return JsonResponse({"error": "ID invalide"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
