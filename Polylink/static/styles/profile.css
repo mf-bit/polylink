@@ -1,0 +1,192 @@
+.piw {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(
+    135deg,
+    #a18cd1,
+    #fbc2eb
+  ); /* violet dégradé élégant */
+  margin-left: 27vh;
+  width: 70vh;
+  padding: 4vh;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* optionnel pour plus de profondeur */
+}
+
+.piw .container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.piw .profile-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.piw .avatar-circle {
+  width: 80px;
+  height: 80px;
+  background-color: #6c63ff;
+  color: white;
+  font-size: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.piw .profile-name-block h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.piw .profile-name-block p {
+  margin: 4px 0 0;
+  color: #666;
+}
+
+.piw .stats {
+  display: flex;
+  justify-content: space-between;
+  margin: 30px 0;
+}
+
+.piw .stat {
+  text-align: center;
+}
+
+.piw .number {
+  font-weight: bold;
+  font-size: 18px;
+  display: block;
+}
+
+.piw .label {
+  color: #999;
+}
+
+.piw .profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.piw .row {
+  display: flex;
+  gap: 16px;
+}
+
+.piw .form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.piw .form-group label {
+  margin-bottom: 4px;
+  color: #444;
+  font-weight: 500;
+}
+
+.piw .form-group input,
+.piw .form-group textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fefefe;
+}
+
+.piw .form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.piw .btn {
+  padding: 10px 20px;
+  font-size: 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.piw .btn.cancel {
+  background: #f0f0f0;
+  color: #444;
+}
+
+.piw .btn.save {
+  background: #6c63ff;
+  color: white;
+}
+
+@media (max-width: 600px) {
+  .piw .row {
+    flex-direction: column;
+  }
+}
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background: var(--color-white);
+  border-radius: var(--card-border-radius);
+  margin-top: 2rem;
+  box-shadow: var(--box-shadow);
+}
+.profile-details .avatar {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.profile-details .avatar img {
+  display: block;
+  width: 100%;
+}
+.profile-details h4 {
+  margin-bottom: 0.5rem;
+}
+.profile-details p {
+  color: var(--color-gray);
+  margin-bottom: 1rem;
+}
+.profile-details form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px; /* Limite la largeur du formulaire */
+}
+.profile-details form label {
+  font-weight: bold;
+}
+.profile-details form input[type="text"],
+.profile-details form input[type="email"] {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid var(--color-light);
+  border-radius: var(--border-radius);
+}
+.profile-details form button {
+  padding: 1rem;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.profile-details form button:hover {
+  background-color: var(--color-primary-variant);
+}

@@ -1,0 +1,134 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile - {{ user.first_name }} {{ user.last_name }}</title>
+  <link rel="stylesheet" href={% static "styles/home.css" %} />
+  <link rel="stylesheet" href={% static "styles/profile.css" %} />
+  <link rel="stylesheet" href={% static "styles/bootstrap-icons.css" %} />
+  <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+  <script defer src={% static "scripts/home.js" %}></script>
+</head>
+
+<body>
+  <header class="navbar">
+    <div class="logo">PolyLink</div>
+    <div class="search-bar">
+      <i class="bi bi-search search-icon"></i>
+      <input type="text" placeholder="Search for creators, inspirations, and projects" />
+    </div>
+    <div class="logout-avatar">
+      <a href="{% url "users:logout" %}">
+        <button class="button logout-btn">Log out</button>
+      </a>
+      <div class="avatar small">
+          <img src={% url "users:avatar" id=user.id %} alt="profil">
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <aside class="sidebar">
+      <div class="profile">
+        <div class="avatar">
+          <img src={% url "users:avatar" id=user.id %} alt="profil">
+        </div>
+        <div class="infos">
+          <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+          <p>@{{ user.username }}</p>
+        </div>
+      </div>
+      <nav>
+        <a href={% url "users:home" %}><i class="bi bi-house-heart"></i>
+          <p>Home</p>
+        </a>
+        <a href={% url "users:explore" %}><i class="bi bi-compass"></i>
+          <p>Explore</p>
+        </a>
+        <a href="#"><i class="bi bi-bell">
+            <div class="badge">9+</div>
+          </i>
+          <p>Notifications</p>
+        </a>
+        <a href="#"><i class="bi bi-envelope">
+            <div class="badge">1</div>
+          </i>
+          <p>conversations</p>
+        </a>
+        <a href="#"><i class="bi bi-people"></i>
+          <p>Follows</p>
+        </a>
+        <a href="#"><i class="bi bi-palette"></i>
+          <p>Theme</p>
+        </a>
+        <a href="#"><i class="bi bi-gear"></i>
+          <p>Settings</p>
+        </a>
+        <a href={% url "users:profile" id=user.id %} class="active"><i class="bi bi-person"></i>
+          <p>Profile</p>
+        </a>
+      </nav>
+      <button class="create-post-btn">Create Post</button>
+    </aside>
+
+    <section class="feed">
+      <div class="piw">
+        <div class="profile-header">
+          <div class="avatar">
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
+          </div>
+          <div class="profile-name-block">
+            <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+            <p>@{{ user.username }}</p>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><span class="number">-</span><span class="label">Posts</span></div>
+          <div class="stat"><span class="number">-</span><span class="label">Followers</span></div>
+          <div class="stat"><span class="number">-</span><span class="label">Following</span></div>
+        </div>
+
+        <form method="POST" class="profile-form">
+          {% csrf_token %}
+          <div class="row">
+            <div class="form-group">
+              <label for="first_name">Prénom:</label>
+              <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}">
+            </div>
+            <div class="form-group">
+              <label for="last_name">Nom:</label>
+              <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="username">Nom d'utilisateur:</label>
+            <input type="text" id="username" name="username" value="{{ user.username }}">
+          </div>
+          <div class="form-group">
+            <label for="phone_number">Numéro de téléphone:</label>
+            <input type="text" id="phone_number" name="phone_number" value="{{ user.phone_number }}">
+          </div>
+          <div class="form-group">
+            <label for="bio">Bio:</label>
+            <textarea id="bio" name="bio" rows="3">{{ user.bio }}</textarea>
+          </div>
+          <div class="form-group">
+            <label for="location">Localisation:</label>
+            <input type="text" id="location" name="location" value="{{ user.location }}">
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn save">Enregistrer les modifications</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
