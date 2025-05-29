@@ -32,23 +32,27 @@
       <a href="{% url "users:logout" %}">
         <button class="button logout-btn">Log out</button>
       </a>
-      <div class="avatar small">
-          <img src={% url "users:avatar" id=user.id %} alt="profil">
-      </div>
+      <a href={% url "users:profile" id=user.id %}>
+        <div class="avatar small">
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
+        </div>
+      </a>
     </div>
   </header>
 
   <main class="container">
     <aside class="sidebar">
-      <div class="profile">
-        <div class="avatar">
-          <img src={% url "users:avatar" id=user.id %} alt="profil">
+      <a href={% url "users:profile" id=user.id %}>
+        <div class="profile">
+          <div class="avatar">
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
+          </div>
+          <div class="infos">
+            <h4>{{user.first_name}} {{user.last_name}}</h4>
+            <p>@{{user.username}}</p>
+          </div>
         </div>
-        <div class="infos">
-          <h4>{{user.first_name}} {{user.last_name}}</h4>
-          <p>@{{user.username}}</p>
-        </div>
-      </div>
+      </a>
       <nav>
         <a href={% url "users:home" %} class="active"><i class="bi bi-house-heart"></i>
           <p>Home</p>
@@ -182,9 +186,11 @@
         {% comment %} <div> {% endcomment %}
             <label class="story add-story" for="story-attach" url={% url "stories:story" %}>
             <img class="cover" src={% url "users:avatar" id=user.id %} alt="cover">
-            <div class="avatar story-avatar">
-              <img src={% url "users:avatar" id=user.id %} alt="profil">
-            </div>
+            <a href={% url "users:profile" id=user.id %}>
+              <div class="avatar story-avatar">
+                <img src={% url "users:avatar" id=user.id %} alt="profil">
+              </div>
+            </a>
             <p class="user firstname">Your</p>
             <p class="user lastname">Story</p>
             <input type="file" name="story-attach" class="story-attach-input" id="story-attach">
@@ -204,9 +210,11 @@
       <form method="POST" action={% url "posts:post" %} class="post-cta-wrapper" enctype="multipart/form-data">
         {% csrf_token %}
           <div class="post-cta">
-            <div class="avatar post-cta-avatar">
-                <img src={% url "users:avatar" id=user.id %} alt="profil">
-            </div>
+            <a href={% url "users:profile" id=user.id %}>
+              <div class="avatar story-avatar">
+                  <img src={% url "users:avatar" id=user.id %} alt="profil">
+              </div>
+            </a>
             <textarea spellcheck="false" name="content" placeholder="What's on your mind, {{user.first_name}}?"></textarea>
             <input type="file" name="image" id="attach">
             <label for="attach" class="attach-image-button">
@@ -222,9 +230,11 @@
       {% for post in posts %}
         <article class="post" id="post-{{ post.id }}">
           <div class="post-header">
-            <div class="avatar">
-              <img src={% url "users:avatar" id=user.id %} alt="profil">
-            </div>
+            <a href={% url "users:profile" id=user.id %}>
+              <div class="avatar">
+                <img src={% url "users:avatar" id=user.id %} alt="profil">
+              </div>
+            </a>
             <div>
               <h4>{{user.first_name}} {{user.last_name}}</h4>
               <p>{{post.date|stringformat:"s"}}</p>
@@ -247,9 +257,11 @@
             <!-- The user write its comment here -->
             <form method="Post" action={% url "posts:comment-post" id=post.id %} class="comment-cta">
               {% csrf_token %}
-              <div class="avatar post-avatar">
-                <img src={% url "users:avatar" id=user.id %} alt="profil">
-              </div>
+              <a href={% url "users:profile" id=user.id %}>
+                <div class="avatar post-avatar">
+                  <img src={% url "users:avatar" id=user.id %} alt="profil">
+                </div>
+              </a>
               <textarea name="content" spellcheck="false" type="text" placeholder="Want to let a comment, {{ user.first_name }}?"></textarea>
               <button type="button" class="button comment-cta-button">Pin</button>
             </form>
@@ -273,9 +285,11 @@
       <div class="header">
         <i class="bi bi-arrow-left go-back-button"></i>
         <p>{{ user.first_name }} {{ user.last_name }}</p>
-        <div class="avatar message-avatar">
-          <img src={% url "users:avatar" id=user.id %} alt="profil">
-        </div>
+        <a href={% url "users:profile" id=user.id %}>
+          <div class="avatar message-avatar">
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
+          </div>
+        </a>
       </div>
 
       <div class="body">

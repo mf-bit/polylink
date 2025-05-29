@@ -12,4 +12,5 @@ urlpatterns = [
     path("avatar/<str:id>/", views.AvatarView.as_view(), name="avatar"),
     path("notifications/<str:notification_id>/read/", views.MarkNotificationReadView.as_view(), name="mark-notification-read"),
     path("notifications/read/all/", views.MarkAllNotificationsReadView.as_view(), name="mark-all-read"),
+    path("profile/<str:id>/", views.ProfileView.as_view(), name="profile"),
 ]

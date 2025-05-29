@@ -1,3 +1,4 @@
+from pyexpat.errors import messages
 from django.shortcuts import render, redirect
 from django.views import View
 from . import forms
@@ -262,3 +263,67 @@ class GetNotificationPreviewView(View):
         if preview:
             return JsonResponse({"success": True, "data": preview})
         return JsonResponse({"success": False, "error": "Notification ou post non trouvé"}, status=404)
+    def get(self, request, id:str):
+        user = db.db.users.find_one({"_id": bson.ObjectId(id)})
+        img_bytes = bytes(user["avatar"])
+        content_type = f"image/{user["avatar_format"]}"
+        return HttpResponse(content=img_bytes, content_type=content_type)
+    
+class ProfileView(View):
+    def get(self, request: HttpRequest, id: str):
+        session_id = request.COOKIES.get("session_id")
+        if not session_id:
+            return redirect("users:login")
+
+        # Récupération de l'utilisateur via la session
+        user = db.get_user_by_session_id(session_id)
+        if not user:
+            response = redirect("users:login")
+            response.delete_cookie("session_id")
+            return response
+
+        # Vérifier si l'ID dans l'URL correspond à l'utilisateur connecté
+        if str(user["_id"]) != id:
+            # Rediriger ou afficher une erreur si l'ID ne correspond pas
+            return redirect("users:home")  # Ou une page d'erreur/message
+
+        user["id"] = str(user["_id"])  # Conversion pour Django template
+        return render(request, "profile.html", {"user": user})
+
+    def post(self, request: HttpRequest, id: str):
+        session_id = request.COOKIES.get("session_id")
+        if not session_id:
+            return redirect("users:login")
+
+        user = db.get_user_by_session_id(session_id)
+        if not user:
+            response = redirect("users:login")
+            response.delete_cookie("session_id")
+            return response
+
+        # Vérifier si l'ID dans l'URL correspond à l'utilisateur connecté
+        if str(user["_id"]) != id:
+            # Rediriger ou afficher une erreur si l'ID ne correspond pas
+            return redirect("users:home")  # Ou une page d'erreur/message
+
+        # Récupérer les données du formulaire à mettre à jour
+        update_data = {
+            # Exemple: ajouter d'autres champs au besoin
+            "first_name": request.POST.get("first_name", user.get("first_name")),
+            "last_name": request.POST.get("last_name", user.get("last_name")),
+            "phone_number": request.POST.get("phone_number", user.get("phone_number")),
+            "bio": request.POST.get("bio", user.get("bio")),
+            "location": request.POST.get("location", user.get("location")),
+            # N'ajoutez pas ici les champs sensibles comme 'password', 'username', 'avatar'
+        }
+
+        # Nettoyer les données (retirer les champs vides si vous ne voulez pas les écraser)
+        update_data = {k: v for k, v in update_data.items() if v is not None}
+
+        if update_data:
+            db.update_user(user["_id"], update_data)
+            # Optionnel: Ajouter un message de succès
+            # messages.success(request, "Profil mis à jour avec succès !")
+
+        # Rediriger vers la page de profil après la mise à jour
+        return redirect("users:profile", id=str(user["_id"]))

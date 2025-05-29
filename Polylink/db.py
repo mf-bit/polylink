@@ -4,6 +4,8 @@ import bcrypt
 from bson import Binary, ObjectId
 from django.http import HttpRequest
 from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
+import bson
 
 # Create a new connection to the polylink database
 con = MongoClient("mongodb://localhost:27017")
@@ -220,3 +222,36 @@ def get_notification_preview(notification_id):
             "image": bool(post.get("image", False))
         }
     }
+def update_user(user_id, update_data):
+    """ Updates user information in the database. """
+    # Ensure user_id is ObjectId
+    if not isinstance(user_id, bson.ObjectId):
+         try:
+             user_id = bson.ObjectId(user_id)
+         except bson.errors.InvalidId:
+             return False # Invalid ID format
+             
+    # Remove potentially problematic fields from update_data
+    update_data.pop('_id', None)
+    update_data.pop('id', None)
+    update_data.pop('username', None)
+    update_data.pop('password', None)
+    update_data.pop('avatar', None)
+    update_data.pop('avatar_format', None)
+
+    # Ajoutez ici la gestion des champs phone_number, bio et location
+    # Assurez-vous que ces champs sont présents dans update_data avant de les utiliser
+    # update_data['phone_number'] = update_data.get('phone_number', None)
+    # update_data['bio'] = update_data.get('bio', None)
+    # update_data['location'] = update_data.get('location', None)
+
+    if not update_data: # No valid fields to update
+        return False
+
+    result = db.users.update_one(
+        {"_id": user_id},
+        {"$set": update_data}
+    )
+    return result.modified_count > 0
+
+
