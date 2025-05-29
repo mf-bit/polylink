@@ -6,7 +6,8 @@ import db
 import bson
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 import bson
-from django.http import HttpResponse, HttpRequest, HttpResponseNotFound, HttpResponseBadRequest
+from django.http import HttpResponse, HttpRequest, JsonResponse
+from django.urls import reverse, HttpResponseNotFound, HttpResponseBadRequest
 from django.http import JsonResponse
 from django.contrib.auth import get_user
 
@@ -59,22 +60,74 @@ class HomeView(View):
                 {"$sort": {"date": -1}},
                 {"$project": {"_id":1, "id": "$_id"}},
             ]
-            stories = db.db.stories.aggregate(pipeline).to_list()
+
+            stories = db.db.stories.aggregate(pipeline).to_list() # We will need an iterable in the template
 
             # Récupérer les notifications avec pagination
             page = int(request.GET.get('page', 1))
             notifications_data = db.get_user_notifications(user["_id"], page=page)
 
-            return render(request, "home.html", {
+            # Retrieve the conversations of the user
+                # Create a pipeline that extract the converstaions with the infos of the other user inside
+            pipeline = [
+                {"$match": {"participants": {'$in': [user["_id"]]}}},  # target the conversation concerning the user
+                {"$unwind": "$participants"},                           # unwind it for easy process: if you do not know what $unwind do, bro, google it!
+                {"$match": {'participants': {'$ne': user['_id']}}},     # select only the document referencing the other user
+                {                                                       # incude the info of the other user: we need then for the template rendering
+                    '$lookup': {
+                        'from': 'users',
+                        'let': {'other_user': '$participants'},
+                        'pipeline': [
+                            {'$match': {"$expr" : {"$eq": ['$_id', '$$other_user']}}},
+                            {'$project': {'_id': 0, 'id': '$_id', 'first_name': 1, 'last_name': 1}}
+                        ],
+                        'as': 'other_user',
+                    }
+                },
+                {
+                    '$lookup': {
+                        'from': 'messages',
+                        'let': {'last_message': '$last_message'},
+                        'pipeline': [
+                            {'$match': {'$expr': {'$eq': ['$_id', '$$last_message']}}},
+                        ],
+                        'as': 'last_message',
+                    }
+                },
+                # Django do not accept varaible that start with _ in the tmeplates. So we have to rename it
+                # Also, $other_user come as an array after loockup, it only contain one element, so we can re-assign it
+                # In the same way, $last_message comes as an array: this is the result after a lookup. We can rewrite it then since it contain only one element
+                {'$project': {'_id': 0, 'id': '$_id', 'other_user': {'$arrayElemAt': ['$other_user', 0]}, 'last_message': {'$arrayElemAt': ['$last_message', 0]}}}  
+            ]
+         
+            # conversations = db.db.conversations.find({'participants': {'$in': [bson.ObjectId(user['id'])]}})
+            conversations  = list(db.db.conversations.aggregate(pipeline))
+
+            # The base's url to use when to search a user
+            search_user_base_url = reverse('users:search', kwargs={'pattern':'_'})
+            index_2nd_last_slash = search_user_base_url.rfind('/', 0, len(search_user_base_url) - 1)
+            search_user_base_url = search_user_base_url[0:index_2nd_last_slash + 1]  # We just need the base root
+
+            # The base's url to use when to start a new conversation
+            start_conversation_base_url = reverse('conversations:start-conversation', kwargs={'username':'_'})
+            index_2nd_last_slash = start_conversation_base_url.rfind('/', 0, len(start_conversation_base_url) - 1)
+            start_conversation_base_url = start_conversation_base_url[0:index_2nd_last_slash + 1]  # We just need the base root
+
+            context = {
                 "user": user, 
                 "posts": posts, 
                 "stories": stories, 
+                'conversations': conversations, 
+                'search_user_base_url': search_user_base_url,
+                'start_conversation_base_url': start_conversation_base_url,
                 "notifications": notifications_data["notifications"],
                 "unread_notifications_count": notifications_data["unread_count"],
                 "has_more_notifications": notifications_data["has_more"],
                 "current_page": page
-            })
+            }
 
+            return render(request, "home.html", context)
+    
 class ExploreView(View):
     def get(self, request:HttpRequest):
         # Retrive the delicious session_id cookie
@@ -202,24 +255,11 @@ class RegisterView(View):
 
 
 class AvatarView(View):
-    def get(self, request, id: str):
-        try:
-            user = db.db.users.find_one({"_id": bson.ObjectId(id)})
-            if not user:
-                return HttpResponseNotFound("User not found")
-            
-            avatar_data = user.get("avatar")
-            avatar_format = user.get("avatar_format")
-            
-            if not avatar_data or not avatar_format:
-                return HttpResponseNotFound("Avatar not found")
-            
-            img_bytes = bytes(avatar_data)
-            content_type = f"image/{avatar_format}"
-            return HttpResponse(img_bytes, content_type=content_type)
-        
-        except bson.errors.InvalidId:
-            return HttpResponseBadRequest("Invalid user ID")
+    def get(self, request, id:str):
+        user = db.db.users.find_one({"_id": bson.ObjectId(id)})
+        img_bytes = bytes(user["avatar"])
+        content_type = f"image/{user["avatar_format"]}"
+        return HttpResponse(content=img_bytes, content_type=content_type)
 
 
 class MarkNotificationReadView(View):
@@ -263,11 +303,32 @@ class GetNotificationPreviewView(View):
         if preview:
             return JsonResponse({"success": True, "data": preview})
         return JsonResponse({"success": False, "error": "Notification ou post non trouvé"}, status=404)
-    def get(self, request, id:str):
-        user = db.db.users.find_one({"_id": bson.ObjectId(id)})
-        img_bytes = bytes(user["avatar"])
-        content_type = f"image/{user["avatar_format"]}"
-        return HttpResponse(content=img_bytes, content_type=content_type)
+    # def get(self, request, id:str):
+    #     user = db.db.users.find_one({"_id": bson.ObjectId(id)})
+    #     img_bytes = bytes(user["avatar"])
+    #     content_type = f"image/{user["avatar_format"]}"
+    #     return HttpResponse(content=img_bytes, content_type=content_type)
+    
+class SearchView(View):
+    def get(self, request, pattern):
+        users = list(db.db.users.find({
+            "username": {'$regex': f"^{pattern}", '$options': "i" },
+        }, {'_id': 0, 'id': '$_id', 'first_name': 1, 'last_name': 1, 'username': 1}))  
+
+        # The front do just need the username, the first_name, the last_name and the location of the avatar (url): we have all but
+        # not the last one
+        for user in users:
+            user['id'] = str(user['id'])
+            user['avatar_url'] = reverse('users:avatar', kwargs={'id':user['id']})
+            del user['id']
+
+        # Handle the case where nothing is found
+        if not users:
+            users = []
+
+        response = JsonResponse(data=users, safe=False)
+        return response
+
     
 class ProfileView(View):
     def get(self, request: HttpRequest, id: str):

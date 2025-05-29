@@ -10,6 +10,7 @@ urlpatterns = [
     path("home/", views.HomeView.as_view(), name="home"),
     path("explore/", views.ExploreView.as_view(), name="explore"),
     path("avatar/<str:id>/", views.AvatarView.as_view(), name="avatar"),
+    path('search/<str:pattern>/', views.SearchView.as_view(), name='search'),
     path("notifications/<str:notification_id>/read/", views.MarkNotificationReadView.as_view(), name="mark-notification-read"),
     path("notifications/read/all/", views.MarkAllNotificationsReadView.as_view(), name="mark-all-read"),
     path("profile/<str:id>/", views.ProfileView.as_view(), name="profile"),

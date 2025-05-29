@@ -77,10 +77,10 @@ def get_user(request: HttpRequest):
 
 def get_user_id_by_session_id(session_id):
     """ This retrieves a user'id from the database using a session id. It returns the id in a string representation """
-    user_id = db.sessions.find_one({"session_id": session_id})["user_id"]
-    if not user_id:
+    session_id = db.sessions.find_one({"session_id": session_id})
+    if not session_id:
         return None
-    return user_id
+    return session_id["user_id"]
 
 def get_user_id(request: HttpRequest):
     """ This retrieve a user from the database using a session id. The retrieve the session id from the receive request object.
