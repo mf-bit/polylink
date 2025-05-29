@@ -7,7 +7,7 @@ import bson
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 import bson
 from django.http import HttpResponse, HttpRequest, JsonResponse
-from django.urls import reverse, HttpResponseNotFound, HttpResponseBadRequest
+from django.urls import reverse
 from django.http import JsonResponse
 from django.contrib.auth import get_user
 

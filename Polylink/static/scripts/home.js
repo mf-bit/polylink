@@ -30,6 +30,8 @@ class SearchInput{
         this.resultBlockEl = this.input.parentElement.querySelector('.results');
         this.search_user_base_url = this.input.attributes.url.value;
         this.start_conversation_base_url = this.resultBlockEl.attributes.url.value;
+        /* This variable hold the id of the current search request: it is the id of a timeout process */
+        this.currentSearchTimeoutId;
         this.init();
     }
 
@@ -38,7 +40,9 @@ class SearchInput{
      */
     init(){
         this.input.addEventListener('input', this.search.bind(this));
-        this.resultBlockEl.addEventListener('click', (event) => console.log('=== ==='));
+        console.log('== ==');
+        this.resultBlockEl.addEventListener('click', (event) => {console.log('=== ===');});
+        console.log(this.resultBlockEl);
         // this.resultBlockEl.addEventListener('click', (event) => this.startConversation.bind(this)(event));
     }
 
@@ -73,8 +77,13 @@ class SearchInput{
 
         // Build the endpoint to query
         const endpoint = `${this.search_user_base_url}${pattern}`;
+        
+        // Set a timeout before requesting
+            // Clear the previous request timeout before sending a new one
+        clearTimeout(this.currentSearchTimeoutId);
 
-        fetch(endpoint, {
+        this.currentSearchTimeoutId = setTimeout(() => {
+            fetch(endpoint, {
             method: 'get',
             headers: {
                 'X-CSRFToken': cookies.csrftoken, 
@@ -83,6 +92,7 @@ class SearchInput{
         .then(response => response.json())
         .then(data => this.load(data))
         .catch(error => console.log(`Error while searching users: ${error}`));
+        }, 200);
     }
 
     /**

@@ -94,8 +94,6 @@ body {
   left: calc(-15%);
   background-color: white; 
   border-bottom: 2px solid #6c5ce7; 
-  /* border-left: 2px solid #6c5ce7;  */
-  /* border-right: 2px solid #6c5ce7;  */
   border-radius: 0px 0px 8px 8px;
   display: flex;
   flex-direction: column;
@@ -108,8 +106,6 @@ body {
   display: flex;
   gap: 5%;
   align-items: center;
-  /* border-left: 2px solid #988ee0; */
-  /* border-right: 2px solid #988ee0; */
   border-left: 2px solid transparent;
   border-right: 2px solid transparent;
   padding: 5px 10px;
@@ -192,13 +188,16 @@ body {
   padding: 1rem 2rem;
   max-width: 1350px;
   margin: 0px auto;
-  /* border: 2px solid red; */
 }
 
 /* Sidebar */
 .sidebar {
   max-width: 250px;
   min-width: 250px;
+}
+
+.sidebar a{
+  text-decoration: none;
 }
 
 .sidebar .profile {

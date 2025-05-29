@@ -27,39 +27,7 @@
     <div class="search-bar">
       <i class="bi bi-search search-icon"></i>
       <input class='search-user-input' type="text" placeholder="Search a user by username" url={{ search_user_base_url }} />
-      <div class="results" url={{ start_conversation_base_url }} />
-        {% comment %} <div class="result">
-          <div class="avatar">
-            <img src={% url "users:avatar" id=user.id %} alt="profil">
-          </div>
-          <h4>{{user.first_name}} {{user.last_name}}</h4>
-          <p><span style='color: rgb(255, 102, 0);'>@</span>{{user.username}}</p>
-        </div>
-
-        <div class="result">
-          <div class="avatar">
-            <img src={% url "users:avatar" id=user.id %} alt="profil">
-          </div>
-          <h4>{{user.first_name}} {{user.last_name}}</h4>
-          <p><span style='color: rgb(255, 102, 0);'>@</span>{{user.username}}</p>
-        </div>
-
-        <div class="result">
-          <div class="avatar">
-            <img src={% url "users:avatar" id=user.id %} alt="profil">
-          </div>
-          <h4>{{user.first_name}} {{user.last_name}}</h4>
-          <p><span style='color: rgb(255, 102, 0);'>@</span>{{user.username}}</p>
-        </div>
-
-        <div class="result">
-          <div class="avatar">
-            <img src={% url "users:avatar" id=user.id %} alt="profil">
-          </div>
-          <h4>{{user.first_name}} {{user.last_name}}</h4>
-          <p><span style='color: rgb(255, 102, 0);'>@</span>{{user.username}}</p>
-        </div> {% endcomment %}
-      </div>
+      <div class="results" url={{ start_conversation_base_url }} /></div>
     </div>
     <div class="logout-avatar">
       <a href="{% url "users:logout" %}">
@@ -197,12 +165,8 @@
                 </div>
             </div>
         </div>
-
-
-        <a href="#"><i class="bi bi-envelope">
-            <div class="badge">1</div>
-          </i>
-          <p>conversations</p>
+        <a href="#"><i class="bi bi-people"></i>
+          <p>Follows</p>
         </a>
         <a href="#"><i class="bi bi-palette"></i>
           <p>Theme</p>
