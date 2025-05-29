@@ -75,10 +75,10 @@ def get_user(request: HttpRequest):
 
 def get_user_id_by_session_id(session_id):
     """ This retrieves a user'id from the database using a session id. It returns the id in a string representation """
-    user_id = db.sessions.find_one({"session_id": session_id})["user_id"]
-    if not user_id:
+    session_id = db.sessions.find_one({"session_id": session_id})
+    if not session_id:
         return None
-    return user_id
+    return session_id["user_id"]
 
 def get_user_id(request: HttpRequest):
     """ This retrieve a user from the database using a session id. The retrieve the session id from the receive request object.
@@ -101,13 +101,64 @@ def output_dict(dic):
         print(f"{key}: {value}")
     print("}")
 
+# if __name__ == '__main__':
+#     print("===Niv===")
+#     ins = db.conversations.insert_one({
+#         "participants": [ObjectId("6830e4fc6465ffcb59c1e7da"), ObjectId("683074b602464ba0016c9b1d")]
+#     })
 
-# with open("bg.png", 'rb') as file:
-#     img_bytes = file.read()
-#     img_format = "png"
-#     db.users.update_one({"username": 'matarfaly'}, {'$set': {'avatar': Binary(img_bytes), 'avatar_format': img_format}})
+#     db.messages.insert_many(
+#     [
+#         {
+#             'sender': ObjectId("6830e4fc6465ffcb59c1e7da"),
+#             'date': datetime.now(timezone.utc),
+#             'content': 'These prices are the "starting from" prices.',
+#             'seen': True,
+#             'conversations': ins.inserted_id,
+#         },
+#         {
+#             'sender': ObjectId("683074b602464ba0016c9b1d"),
+#             'date': datetime.now(timezone.utc),
+#             'content': 'They correspond to the lowest total price available on the dates requested, based on one accommodation (room, bed, etc.) or other services.',
+#             'seen': True,
+#             'conversations': ins.inserted_id,
+#         },
+#         {
+#             'sender': ObjectId("6830e4fc6465ffcb59c1e7da"),
+#             'date': datetime.now(timezone.utc),
+#             'content': 'Et apres!',
+#             'seen': True,
+#             'conversations': ins.inserted_id,
+#         },
+#         {
+#             'sender': ObjectId("683074b602464ba0016c9b1d"),
+#             'date': datetime.now(timezone.utc),
+#             'content': '🤨',
+#             'seen': True,
+#             'conversations': ins.inserted_id,
+#         },
+#         {   'sender': ObjectId("6830e4fc6465ffcb59c1e7da"),
+#             'date': datetime.now(timezone.utc),
+#             'content': 'Veux.',
+#             'seen': False,
+#             'conversations': ins.inserted_id,
+#         },
+#         {   'sender': ObjectId("6830e4fc6465ffcb59c1e7da"),
+#             'date': datetime.now(timezone.utc),
+#             'content': 'Te sakh damay dem sen keur deh!.',
+#             'seen': False,
+#             'conversations': ins.inserted_id,
+#         },
+#         {
+#             'sender': ObjectId("683074b602464ba0016c9b1d"),
+#             'date': datetime.now(timezone.utc),
+#             'content': 'Yaah 😮',
+#             'seen': True,
+#             'conversations': ins.inserted_id,
+#         },
+#     ]
+#     )
 
-# with open("laye.jpg", 'rb') as file:
-#     img_bytes = file.read()
-#     img_format = "jpg"
-#     db.users.update_one({"username": 'laye'}, {'$set': {'avatar': Binary(img_bytes), 'avatar_format': img_format}})
+# db.conversations.insert_one({
+#     'participants': [ObjectId("683074b602464ba0016c9b1d"), ObjectId("6830be3602464ba0016c9b24")],
+# })

@@ -22,4 +22,5 @@ urlpatterns = [
     path('user/', include("users.urls")),
     path("post/", include("posts.urls")),
     path("stories/", include("stories.urls")),
+    path('conversation/', include("conversations.urls")),
 ]

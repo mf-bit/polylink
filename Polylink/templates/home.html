@@ -24,7 +24,40 @@
     <div class="logo">PolyLink</div>
     <div class="search-bar">
       <i class="bi bi-search search-icon"></i>
-      <input type="text" placeholder="Search for creators, inspirations, and projects" />
+      <input class='search-user-input' type="text" placeholder="Search a user by username" url={{ search_user_base_url }} />
+      <div class="results" url={{ start_conversation_base_url }} />
+        {% comment %} <div class="result">
+          <div class="avatar">
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
+          </div>
+          <h4>{{user.first_name}} {{user.last_name}}</h4>
+          <p><span style='color: rgb(255, 102, 0);'>@</span>{{user.username}}</p>
+        </div>
+
+        <div class="result">
+          <div class="avatar">
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
+          </div>
+          <h4>{{user.first_name}} {{user.last_name}}</h4>
+          <p><span style='color: rgb(255, 102, 0);'>@</span>{{user.username}}</p>
+        </div>
+
+        <div class="result">
+          <div class="avatar">
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
+          </div>
+          <h4>{{user.first_name}} {{user.last_name}}</h4>
+          <p><span style='color: rgb(255, 102, 0);'>@</span>{{user.username}}</p>
+        </div>
+
+        <div class="result">
+          <div class="avatar">
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
+          </div>
+          <h4>{{user.first_name}} {{user.last_name}}</h4>
+          <p><span style='color: rgb(255, 102, 0);'>@</span>{{user.username}}</p>
+        </div> {% endcomment %}
+      </div>
     </div>
     <div class="logout-avatar">
       <a href="{% url "users:logout" %}">
@@ -162,7 +195,7 @@
                   <div class="avatar post-avatar">
                     <img src={% url "users:avatar" id=comment.author %} alt="profil">
                   </div>
-                  <p>{{comment.content}} </p> <!-- This has 'white-space: pre-line', be careful then -->
+                  <p>{{comment.content}}</p> <!-- This has 'white-space: pre-line', be careful then -->
                 </div>
             {% endfor %}
           </div>
@@ -171,53 +204,40 @@
       {% endfor %}
     </section>
 
-    <div class="inside-conversation">
-      <div class="header">
-        <i class="bi bi-arrow-left go-back-button"></i>
-        <p>{{ user.first_name }} {{ user.last_name }}</p>
-        <div class="avatar message-avatar">
-          <img src={% url "users:avatar" id=user.id %} alt="profil">
+    <div class="conversations-wrapper">
+      <aside class="conversations">
+        <div class="conversations-header">
+          <p>Conversations</p>
+          <div class="search-bar">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" placeholder="Search conversations" />
+          </div>
+          <div class="tabs">
+            <span class="active">All</span>
+            <span>Unread</span>
+          </div>
         </div>
-      </div>
 
-      <div class="body">
-        <div class="left message">
-          <p class="text">
-            Click one of the examples listed below to open the Shuffle Visual Editor with the UI library that uses the selected component. You don't need to remember all CSS classes
-          </p>
+        <div class="conversation-list">
+          {% for conversation in conversations %}
+            <div class="conversation" url={% url 'conversations:conversation' id=conversation.id %} />
+              <div class="avatar">
+                <img src={% url "users:avatar" id=conversation.other_user.id %} alt="profil">
+              </div>
+              <div>
+                <h4>{{conversation.other_user.first_name}} {{conversation.other_user.last_name}}</h4>
+                <p class='last-message-view'>{{ conversation.last_message.content|slice:'0:10' }}...</p>
+              </div>
+              <div class="infos">
+                <p>{{ conversation.last_message.date }}</p>
+                <span style='white-space: pre;'> </span>
+              </div>
+            </div>
+          {% endfor %}
         </div>
-        <div class="right message">
-          <p class="text">
-          Bootstrap 5 is a popular front-end web development framework that provides many useful features and tools to create responsive, modern web applications. One of these features is the ability to create rounded corners on various HTML elements using the border-radius utility class.
-          </p>
-        </div>
-        <div class="left message">
-          <p class="text">
-            Nice
-          </p>
-        </div>
-        <div class="right message">
-          <p class="text">
-            Here is the picture: 👇🏿
-          </p>
-        </div>
-        <div class="right message message-image">
-          <img src={% static "images/feed-5.jpg" %} alt="">
-        </div>
-      </div>
+      </aside>
 
-      <div class="write-message">
-        <label for="attach" class="attach-doc-button">
-          <i title="attach an document" class="bi bi-plus-lg"></i>
-        </label>
-        <input type="file" name="image" id="attach">
-        <textarea spellcheck="false" name="message" placeholder="Message..."></textarea>
-        <i title="write-emoji" class="bi bi-emoji-smile write-emoji"></i>
-        {% comment %} <div class="attach-wrapper">
-          <img src="" alt="attach" class="post-attach">
-          <i class="bi bi-x-circle-fill discard-attach-button"></i>
-        </div> {% endcomment %}
-      </div>
+      <aside class="inside-conversation"></aside>
     </div>
   </main>
 </body>

@@ -3,7 +3,8 @@ from django.views import View
 from . import forms
 import db
 import bson
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpResponse, HttpRequest, JsonResponse
+from django.urls import reverse
 
 class HomeView(View):
     def get(self, request:HttpRequest):
@@ -54,8 +55,65 @@ class HomeView(View):
                 {"$sort": {"date": -1}},
                 {"$project": {"_id":1, "id": "$_id"}},
             ]
+
             stories = db.db.stories.aggregate(pipeline).to_list() # We will need an iterable in the template
-            return render(request, "home.html", {"user": user, "posts": posts, "stories": stories})  
+
+            # Retrieve the conversations of the user
+                # Create a pipeline that extract the converstaions with the infos of the other user inside
+            pipeline = [
+                {"$match": {"participants": {'$in': [user["_id"]]}}},  # target the conversation concerning the user
+                {"$unwind": "$participants"},                           # unwind it for easy process: if you do not know what $unwind do, bro, google it!
+                {"$match": {'participants': {'$ne': user['_id']}}},     # select only the document referencing the other user
+                {                                                       # incude the info of the other user: we need then for the template rendering
+                    '$lookup': {
+                        'from': 'users',
+                        'let': {'other_user': '$participants'},
+                        'pipeline': [
+                            {'$match': {"$expr" : {"$eq": ['$_id', '$$other_user']}}},
+                            {'$project': {'_id': 0, 'id': '$_id', 'first_name': 1, 'last_name': 1}}
+                        ],
+                        'as': 'other_user',
+                    }
+                },
+                {
+                    '$lookup': {
+                        'from': 'messages',
+                        'let': {'last_message': '$last_message'},
+                        'pipeline': [
+                            {'$match': {'$expr': {'$eq': ['$_id', '$$last_message']}}},
+                        ],
+                        'as': 'last_message',
+                    }
+                },
+                # Django do not accept varaible that start with _ in the tmeplates. So we have to rename it
+                # Also, $other_user come as an array after loockup, it only contain one element, so we can re-assign it
+                # In the same way, $last_message comes as an array: this is the result after a lookup. We can rewrite it then since it contain only one element
+                {'$project': {'_id': 0, 'id': '$_id', 'other_user': {'$arrayElemAt': ['$other_user', 0]}, 'last_message': {'$arrayElemAt': ['$last_message', 0]}}}  
+            ]
+         
+            # conversations = db.db.conversations.find({'participants': {'$in': [bson.ObjectId(user['id'])]}})
+            conversations  = list(db.db.conversations.aggregate(pipeline))
+
+            # The base's url to use when to search a user
+            search_user_base_url = reverse('users:search', kwargs={'pattern':'_'})
+            index_2nd_last_slash = search_user_base_url.rfind('/', 0, len(search_user_base_url) - 1)
+            search_user_base_url = search_user_base_url[0:index_2nd_last_slash + 1]  # We just need the base root
+
+            # The base's url to use when to start a new conversation
+            start_conversation_base_url = reverse('conversations:start-conversation', kwargs={'username':'_'})
+            index_2nd_last_slash = start_conversation_base_url.rfind('/', 0, len(start_conversation_base_url) - 1)
+            start_conversation_base_url = start_conversation_base_url[0:index_2nd_last_slash + 1]  # We just need the base root
+
+            context = {
+                "user": user, 
+                "posts": posts, 
+                "stories": stories, 
+                'conversations': conversations, 
+                'search_user_base_url': search_user_base_url,
+                'start_conversation_base_url': start_conversation_base_url,
+            }
+
+            return render(request, "home.html", context)
     
 class ExploreView(View):
     def get(self, request:HttpRequest):
@@ -186,3 +244,23 @@ class AvatarView(View):
         img_bytes = bytes(user["avatar"])
         content_type = f"image/{user["avatar_format"]}"
         return HttpResponse(content=img_bytes, content_type=content_type)
+    
+class SearchView(View):
+    def get(self, request, pattern):
+        users = list(db.db.users.find({
+            "username": {'$regex': f"^{pattern}", '$options': "i" },
+        }, {'_id': 0, 'id': '$_id', 'first_name': 1, 'last_name': 1, 'username': 1}))  
+
+        # The front do just need the username, the first_name, the last_name and the location of the avatar (url): we have all but
+        # not the last one
+        for user in users:
+            user['id'] = str(user['id'])
+            user['avatar_url'] = reverse('users:avatar', kwargs={'id':user['id']})
+            del user['id']
+
+        # Handle the case where nothing is found
+        if not users:
+            users = []
+
+        response = JsonResponse(data=users, safe=False)
+        return response

@@ -17,6 +17,115 @@ function getCookies(){
 /** A utility variale holding the cookies 'a chaud': je raffole des cookies 😁. */
 let cookies = getCookies();
 
+/** 
+ * Handles the user research
+ */
+class SearchInput{
+    /**
+     * Initilizer
+     * @param {HTMLElement} element The input the user interact to search for some user
+     */
+    constructor(element){
+        this.input = element;
+        this.resultBlockEl = this.input.parentElement.querySelector('.results');
+        this.search_user_base_url = this.input.attributes.url.value;
+        this.start_conversation_base_url = this.resultBlockEl.attributes.url.value;
+        this.init();
+    }
+
+    /**
+     * Attachs some event listener to the element
+     */
+    init(){
+        this.input.addEventListener('input', this.search.bind(this));
+        this.resultBlockEl.addEventListener('click', (event) => console.log('=== ==='));
+        // this.resultBlockEl.addEventListener('click', (event) => this.startConversation.bind(this)(event));
+    }
+
+    /**
+     * Load the result of reaseach on the pade
+     * @param {JSON} data A json format data containing the user requested
+     */
+    load(data){
+        this.resultBlockEl.innerHTML = '';
+        data.forEach(user_infos => {
+            let result = document.createElement('div');
+            result.classList.add('result');
+            result.innerHTML = `
+                <div class="avatar">
+                    <img src=${user_infos['avatar_url']} alt="profil">
+                </div>
+                <h4>${user_infos['first_name']} ${user_infos['last_name']} </h4>
+                <p><span style='color: rgb(255, 102, 0);'>@</span><span class='result-username'>${user_infos['username']}</span></p>
+            `;
+            this.resultBlockEl.appendChild(result);
+        })
+    }
+
+    /**
+     * Handles the researches
+     */
+    search(){
+        // Check if the pattern is valid
+        const pattern = this.input.value;
+        if(pattern == '')
+            return;
+
+        // Build the endpoint to query
+        const endpoint = `${this.search_user_base_url}${pattern}`;
+
+        fetch(endpoint, {
+            method: 'get',
+            headers: {
+                'X-CSRFToken': cookies.csrftoken, 
+            }
+        })
+        .then(response => response.json())
+        .then(data => this.load(data))
+        .catch(error => console.log(`Error while searching users: ${error}`));
+    }
+
+    /**
+     * Starts a new conversation
+     * @param {Event} event The event triggered in the DOM
+     */
+    startConversation(event){
+        // Find the clicked conversation
+        console.log('===  ====');
+        let target = event.target;
+        if(!target.classList.contains('result'))
+            if(target.parentElement.classList.contains('result'))
+                target = target.parentElement;
+            else
+                return;  // stop the process of no conversation is triggered
+        
+        // Retrive the other user username
+        const other_user_username = target.querySelector('.result-username').innerText;
+        
+        // Ask the server to start a new conversation
+        const endpoint = `${this.start_conversation_base_url}${other_user_username}/`;
+        fetch(endpoint, {
+            method: 'post',
+            headers: {
+                'X-CSRFToken': cookies.csrftoken, 
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            // Test if their is no error
+            if(data.error){
+                alert(data.error);
+                return;
+            }
+            const avatar_src = target.querySelector('img').src;
+            const completeName = target.querySelector('h4').innerText;
+            Conversation.addNewConversation(data.conversation_src, avatar_src, completeName);
+        })
+        .catch(error => console.log(error));    
+    }
+}
+
 /**
  * This represents a post element
  * @class
@@ -103,9 +212,7 @@ class Post {
                 <div class="avatar post-avatar">
                     <img src=${document.querySelector(".sidebar .profile .avatar img").src} alt="profil">
                 </div>
-                <p>
-                    ${content}
-                </p>
+                <p>${content}</p> <!-- This has 'white-space: pre-line', be careful then -->
             </div>
             `;
         this.commentsSection.insertBefore(commentEl, this.letCommentEl.nextElementSibling);
@@ -383,83 +490,250 @@ class Story{
     }
 }
 
+// /**
+//  * This represents a block containing the content of a given conversation
+//  */
+// class InsideConversation{
+//     /**
+//      * Initializer
+//      * @param {HTMLElement} element The element representing the inside of a conversation
+//      */
+//     constructor(element){
+//         this.inside = element;
+//         this.endpoint;
+//     }
+
+//     /**
+//      * Renders the content of the element
+//      */
+//     render(body, send_message_endpoint, friend_name){
+//         this.inne
+//     }
+
+//     /**
+//      * This makes the element dynamic by attaching it some event listeners
+//      */
+//     init(){
+//         this.inside.querySelector('.go-back-button').addEventListener('click', this.goBack.bind(this));
+//         this.inside.querySelector('.send-button').addEventListener('click', this.sendMessage.bind(this));
+//     }
+
+//     /**
+//      * Handles messages sending process
+//      */
+//     sendMessage(){
+//         const endpoint = this.element.querySelector('.write-message').attributes.url.value;
+//         const content = this.element.querySelector('textarea').value;
+//         fetch(endpoint, {
+//             method: 'POST',
+//             headers: {
+//                 "X-CSRFToken": cookies.csrftoken,
+//                 'Content-Type': 'text/plain',
+//             },
+//             body: content,
+//         }).then(response => {
+//             // Add the message on the page
+//             let body = this.element.querySelector('.body');
+//             let message = document.createElement('div');
+//             message.classList.add('sent', 'message');
+//             message.innerHTML = `<p class="text">${content}</p>`
+//             body.insertBefore(message, null);
+
+//             // Make the body scroll to the end to make the new added element visible
+//             body.scrollTo({top: body.scrollHeight, behavior: 'smooth'});
+
+//             // Clear the text input
+//             this.element.querySelector('textarea').value = '';
+//         })
+//         .catch(error => console.log(`Error while sending message: ${error}`));
+//     }
+// }
+
 /**
  * This represents a conversation element 
  */
 class Conversation{
+    /** The wrapper that contains every conversations: we will need to modify its content to show the message of this conversaion */
+    static conversationsBlockEl = document.querySelector('.conversations');
+
+    static convsersationListEl = document.querySelector('.conversation-list');
+
+    /** The block that contains the message of specific conversation: when a conversation is clicked, this part is update to content of that con */
+    static insideConversation = document.querySelector(".inside-conversation");
+
+    /** This is an array of already requested converstions: if a conversation is fetch one time, it will not be fetch again */
+    static fetchedConversations = {};
+
     /**
      * Initializes a new conversation object
      * @param {HTMLElement} element The html element that represents the conversation.
      */
     constructor(element){
+        /** The element representing the conversation */
         this.conversationEl = element;
-        this.unreadMessageEl = this.element.querySelector('.infos span');
-        this.lastMessageViewEl = this.element.querySelector('.last-message-view');  
-        this.lastMessageDateEl = this.element.querySelector('.infos p');
+
+        this.unreadMessageNumEl = this.conversationEl.querySelector('.infos span');
+        this.lastMessageViewEl = this.conversationEl.querySelector('.last-message-view');  
+        this.lastMessageDateEl = this.conversationEl.querySelector('.infos p');
+
         /** The endpoint to query in order the load the messages */
         this.endpoint = this.conversationEl.attributes.url.value;
-        /** The block containing the messages of the conversation */
-        this.insideConversation = this.conversationEl.querySelector('inside-conversation');
 
         this.init();
     }
-        /**
-         * This initialize the elements by attaching events to them
-         */
-        init(){
-            this.conversationEl.addEventListener('click', this.loadConversation.bind(this));
-        }
+    /**
+     * This initialize the elements by attaching events to them
+     */
+    init(){    
+        this.conversationEl.addEventListener('click', this.fetchAndLoad.bind(this));
+    }
 
-        /**
-         * Loads the messages of the conversation
-         */
-        loadConversation(){
-            fetch(this.endpoint, {
-                method: 'GET',
-                headers: {
-                    "X-CSRFToken": cookies.csrftoken,
-                }
-            })
-            .then(response => response.text())
-            .then(data => {
-                this.insideConversation.outerHTML = data;
-            })
-            .catch(error => console(`Loading message for the conversation fails: ${error}`));
-        }
+    /** 
+     * Fetchs a conversation from the database and loads it in the front
+     */
+    fetchAndLoad(){
+        fetch(this.endpoint, {
+            method: 'GET',
+            headers: {
+                "X-CSRFToken": cookies.csrftoken,
+            }
+        })
+        .then(response => response.text())
+        .then(data => {
+            this.feed(data); 
+            Conversation.fetchedConversations[this.endpoint] = data;
+        })
+        .catch(error => console.log(`Loading message for the conversation fails: ${error}`));
+    }
+
+    /**
+     * Loads the messages of the conversation in a intelligent way.
+     */
+    load(){
+        if(!Conversation.fetchedConversations[this.endpoint])
+            this.fetchAndLoad();
+        else
+            this.feed(fetchedConversations[this.endpoint]);
+    }
+
+    /**
+     * This feeds the block element that have to contain the conversation content.
+     * @param {String} content A string representing the content to insert within the block that has to contain a conversation content
+     */
+    feed(content){
+        Conversation.insideConversation.innerHTML = content;
+        /** Activate the button to trigger to send a message */
+        let sendButton = Conversation.insideConversation.querySelector('.send-button');
+        sendButton.addEventListener('click', this.sendMessage.bind(this));
+
+        // Make the textarea (input user interact to write message) dynamic
+        new Textarea(Conversation.insideConversation.querySelector('textarea'));
+
+        // Make the go back button dynamic: the button that get back the conversations list section
+        let button = Conversation.insideConversation.querySelector('.go-back-button');
+        button.addEventListener('click', () => {
+            // Hide the conversation list block and make the content inside the conversation visible
+            Conversation.insideConversation.classList.remove('shown');
+        });
+
+        // Hide the conversation list block and make the content inside the conversation visible
+        Conversation.insideConversation.classList.add('shown');
+
+        // Scroll the body till the end
+        let body = Conversation.insideConversation.querySelector('.body');
+        body.scrollTo({top: body.scrollHeight, behavior: 'instant'});
+    }
+
+    /**
+     * Handles messages sending process
+     */
+    sendMessage(){      
+        const endpoint = Conversation.insideConversation.querySelector('.write-message').attributes.url.value;
+        const content = Conversation.insideConversation.querySelector('textarea').value;
+        fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                "X-CSRFToken": cookies.csrftoken,
+                'Content-Type': 'text/plain',
+            },
+            body: content,
+        }).then(response => {
+            // Add the message on the page
+            let body = Conversation.insideConversation.querySelector('.body');
+            let message = document.createElement('div');
+            message.classList.add('sent', 'message');
+            message.innerHTML = `<p class="text">${content}</p>`
+            body.insertBefore(message, null);
+
+            // Make the body scroll to the end to make the new added element visible
+            body.scrollTo({top: body.scrollHeight, behavior: 'smooth'});
+
+            // Clear the text input and resize it
+            Conversation.insideConversation.querySelector('textarea').value ='';
+            Conversation.insideConversation.querySelector('textarea').style.height = 'auto';
+
+            // Update the view of the last message of the conversation
+            this.lastMessageViewEl.innerHTML = `${content.substring(0, 10)}...`;
+        })
+        .catch(error => console.log(`Error while sending message: ${error}`));
+    }
+
+    /**
+     * Loads a new conversation to  the list
+     * @param {String} conversation_url The conversation url to request to get the content of the conversation
+     * @param {String} avatar_src The location of the avatar ressource
+     * @param {String} completeName The complete name of the other user whom the want to communicate  
+     */
+    static addNewConversation(conversation_url, avatar_src, completeName){
+        const date = new Date();
+        const conversation = document.createElement('div');
+        conversation.classList.add('conversation');
+        conversation.attributes.url = conversation_url;
+        conversation.innerHTML = `
+            <div class="avatar">
+                <img src=${avatar_src} alt="profil">
+            </div>
+            <div>
+                <h4>${completeName}</h4>
+                <p class='last-message-view'></p>
+                </div>
+                <div class="infos">
+                <p>${date.getHours()}:${date.getMinutes()}</p>
+                <span style='white-space: pre;'> </span>
+            </div>
+        ` ;
+        Conversation.convsersationListEl.insertBefore(conversation, Conversation.convsersationListEl.firstElementChild);
+    }
+    
 }
 
-// /**
-//  * This represents a textarea element.
-//  */
-// class Textarea{
-//     /**
-//      * Initializes a new textarea element.
-//      * @param {HTMLElement} element The element representing the textarea.
-//      */
-//     constructor(element){
-//         this.textareaEl = element;
-//         this.numberOfLineFeed = 0;
-//         this.textareaEl.addEventListener("input", () => this.adjustHeight.bind(this));
-//     }
 
-//     adjustHeight(){
+/**
+ * This represents a textarea element.
+ */
+class Textarea{
+    /**
+     * Initializes a new textarea element. It is use to handle the auto resize of textarea element.
+     * @param {HTMLElement} element The element representing the textarea.
+     */
+    constructor(element){
+        this.textareaEl = element;
+        this.textareaEl.addEventListener("input", this.adjustHeight.bind(this));
+    }
 
-//     }
+    adjustHeight(){
+        this.textareaEl.style.height = "auto";
+        this.textareaEl.style.height = (this.textareaEl.scrollHeight) + "px";
+    }
 
-// }
+}
 
 // ===================================================================================
 // ===================================================================================
 
 // Handle the autoresize textareas
 const postInputEls = document.querySelectorAll("textarea");
-postInputEls.forEach((postInputEl) => {
-    postInputEl.addEventListener("input", (event) => {
-        postInputEl.style.height = "auto";
-        postInputEl.style.height = (postInputEl.scrollHeight) + "px";
-     }
-    )
-})
+postInputEls.forEach((postInputEl) => new Textarea(postInputEl));
 
 // Create Post elements and the PostCTAWrapper element
 let postList = document.querySelectorAll(".post");
@@ -479,9 +753,11 @@ let story = document.querySelector(".feed .story.add-story");
 new AddStoryEl(story);
 
 // Creating the conversation objects
-let conversations = document.querySelector('.conversation');
+let conversations = document.querySelectorAll('.conversation');
 conversations.forEach(con => new Conversation(con));
 
+// Make the input used to search user dynamic
+new SearchInput(document.querySelector('.search-user-input'));
 
 // const file = document.querySelector(".post-cta input").files[0];
 // const reader = new FileReader();

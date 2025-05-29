@@ -10,4 +10,5 @@ urlpatterns = [
     path("home/", views.HomeView.as_view(), name="home"),
     path("explore/", views.ExploreView.as_view(), name="explore"),
     path("avatar/<str:id>/", views.AvatarView.as_view(), name="avatar"),
+    path('search/<str:pattern>/', views.SearchView.as_view(), name='search'),
 ]
