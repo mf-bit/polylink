@@ -33,9 +33,13 @@ class ConversationView(View):
         
         # Verify if the other user does not already have a discussion
         conversation = db.db.conversations.find_one({
-            'participants': {'$in': [bson.ObjectId(user_id), bson.ObjectId(other_user_id)]}
+            '$and': [
+                {'participants': {'$in': [bson.ObjectId(user_id)]}},
+                {'participants': {'$in': [bson.ObjectId(other_user_id)]}},
+            ]
         })
-        if not conversation:
+ 
+        if conversation:
             return JsonResponse(data={'error': 'Bro, you are already in talk with this guys, come on man 😭'})
         
         conversation = db.db.conversations.insert_one({

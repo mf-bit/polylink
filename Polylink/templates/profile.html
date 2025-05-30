@@ -10,8 +10,10 @@
   <link rel="stylesheet" href={% static "styles/home.css" %} />
   <link rel="stylesheet" href={% static "styles/profile.css" %} />
   <link rel="stylesheet" href={% static "styles/bootstrap-icons.css" %} />
+  <link rel="stylesheet" href={% static "styles/notifications.css" %} />
   <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
   <script defer src={% static "scripts/home.js" %}></script>
+  <script defer src={% static "scripts/notifications.js" %}></script>
 </head>
 
 <body>
@@ -19,7 +21,10 @@
     <div class="logo">PolyLink</div>
     <div class="search-bar">
       <i class="bi bi-search search-icon"></i>
-      <input type="text" placeholder="Search for creators, inspirations, and projects" />
+      <input class='search-user-input' type="text" placeholder="Search a user by username" url={{ search_user_base_url }} />
+      <div class="results" url={{ start_conversation_base_url }} />
+        <p class="nothing-found-placeholder">Nothing found 😭😁🤧</p>
+      </div>
     </div>
     <div class="logout-avatar">
       <a href="{% url "users:logout" %}">

@@ -254,4 +254,8 @@ def update_user(user_id, update_data):
     )
     return result.modified_count > 0
 
+if __name__ == '__main__':
+    db.conversations.drop()
+    db.messages.drop()
+
 

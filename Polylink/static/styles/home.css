@@ -80,7 +80,7 @@ body {
   font-size: 0.9rem;
 }
 
-.search-user-input:focus ~ .results{
+.search-user-input:focus ~ .results, .search-bar .results:hover{
   visibility: visible;
 }
 
@@ -100,6 +100,11 @@ body {
   gap: 10px;
   padding: 20px;
   visibility: hidden;
+}
+
+.search-bar .nothing-found-placeholder{
+  margin: 0px auto;
+  font-size: 1rem;
 }
 
 .search-bar .results .result{

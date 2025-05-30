@@ -1,5 +1,4 @@
 // Some utility functions
-
 /**
  * Split the cookie header parameter into a list of object. Each object consists of two pair: the key of the cookie and each value.
  * @returns {Object} A object where its key corresponds to a cookie name, and the associated value the cookie value.
@@ -27,7 +26,7 @@ class SearchInput{
      */
     constructor(element){
         this.input = element;
-        this.resultBlockEl = this.input.parentElement.querySelector('.results');
+        this.resultBlockEl = document.querySelector('.results');
         this.search_user_base_url = this.input.attributes.url.value;
         this.start_conversation_base_url = this.resultBlockEl.attributes.url.value;
         /* This variable hold the id of the current search request: it is the id of a timeout process */
@@ -40,10 +39,7 @@ class SearchInput{
      */
     init(){
         this.input.addEventListener('input', this.search.bind(this));
-        console.log('== ==');
-        this.resultBlockEl.addEventListener('click', (event) => {console.log('=== ===');});
-        console.log(this.resultBlockEl);
-        // this.resultBlockEl.addEventListener('click', (event) => this.startConversation.bind(this)(event));
+        this.resultBlockEl.addEventListener('click', (event) => this.startConversation.bind(this)(event));
     }
 
     /**
@@ -51,6 +47,12 @@ class SearchInput{
      * @param {JSON} data A json format data containing the user requested
      */
     load(data){
+        // Check if the data array is empty or not
+        if(data.length == 0){
+            this.resultBlockEl.innerHTML = '<p class="nothing-found-placeholder">Nothing found 😭😁🤧</p>';
+            return;
+        }
+        
         this.resultBlockEl.innerHTML = '';
         data.forEach(user_infos => {
             let result = document.createElement('div');
@@ -92,7 +94,7 @@ class SearchInput{
         .then(response => response.json())
         .then(data => this.load(data))
         .catch(error => console.log(`Error while searching users: ${error}`));
-        }, 200);
+        }, 100);
     }
 
     /**
@@ -101,7 +103,6 @@ class SearchInput{
      */
     startConversation(event){
         // Find the clicked conversation
-        console.log('===  ====');
         let target = event.target;
         if(!target.classList.contains('result'))
             if(target.parentElement.classList.contains('result'))
@@ -698,7 +699,7 @@ class Conversation{
         const date = new Date();
         const conversation = document.createElement('div');
         conversation.classList.add('conversation');
-        conversation.attributes.url = conversation_url;
+        conversation.setAttribute('url', conversation_url);
         conversation.innerHTML = `
             <div class="avatar">
                 <img src=${avatar_src} alt="profil">
@@ -712,7 +713,11 @@ class Conversation{
                 <span style='white-space: pre;'> </span>
             </div>
         ` ;
+
         Conversation.convsersationListEl.insertBefore(conversation, Conversation.convsersationListEl.firstElementChild);
+
+        // Make the newly creating conversation dynamic
+        new Conversation(conversation);
     }
     
 }
