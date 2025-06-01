@@ -1,0 +1,8 @@
+{% for story in stories %}
+    <a href={% url "stories:get-story" id=story.id %}>
+    <div class="story">
+        <i class="bi bi-x-circle-fill delete-post-button" url={% url "stories:delete-story" id=story.id %}></i>
+        <img class="cover" src={% url "stories:story-thumbnail" id=story.id %} alt="cover">
+    </div>
+    </a>
+{% endfor %}

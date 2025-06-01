@@ -1,0 +1,42 @@
+
+<aside class="sidebar">
+    <a href={% url "users:profile" id=user.id %}>
+    <div class="profile">
+        <div class="avatar">
+        <img src={% url "users:avatar" id=user.id %} alt="profil">
+        </div>
+        <div class="infos">
+        <h4>{{user.first_name}} {{user.last_name}}</h4>
+        <p>@{{user.username}}</p>
+        </div>
+    </div>
+    </a>
+    <nav>
+        <a href={% url "users:home" %} class="home-link"><i class="bi bi-house-heart"></i>
+            <p>Home</p>
+        </a>
+        <a href={% url "users:explore" %} class="explore-link"><i class="explore-link bi bi-compass"></i>
+            <p>Explore</p>
+        </a>
+
+        {% include "notification.html" %}
+        
+        <a href={% url "users:profile" id=user.id %} class="profile-link"><i class="bi bi-person"></i>
+            <p>Profile</p>
+        </a>
+        <a href={% url "users:get-followings" %} class='follows-link'><i class="bi bi-people"></i>
+            <p>Follows</p>
+        </a>
+        <a href="#" class='theme-link not-active'><i class="bi bi-palette"></i>
+            <p>Theme</p>
+        </a>
+        <a href="#" class='settings-link not-active'><i class="bi bi-gear"></i>
+            <p>Settings</p>
+        </a>
+    </nav>
+    <button class="create-post-btn">Create Post</button>
+</aside>
+
+<script defer>
+    document.querySelector('.sidebar nav a.{{active_link}}').classList.add('active');
+</script>

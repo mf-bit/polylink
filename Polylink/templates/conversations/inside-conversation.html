@@ -1,0 +1,28 @@
+{% load static %}
+{% comment %} <aside class="inside-conversation"> {% endcomment %}
+      <div class="header">
+        <i class="bi bi-arrow-left go-back-button"></i>
+        <p>{{ other_user.first_name }} {{ other_user.last_name }}</p>
+        <div class="avatar message-avatar">
+          <img src={% url "users:avatar" id=other_user.id %} alt="profil">
+        </div>
+      </div>
+
+      <div class="body">
+        {% for message in messages %}
+           <div class="{% if user_id == message.sender %}sent{% endif %} message">
+                <p class="text">{{ message.content }}</p>  <!-- Be careful, this element has the white-space property set to pre-->
+           </div>
+        {% endfor %}
+      </div> 
+
+      <div class="write-message" url={% url "conversations:message" id=conversation_id %}>
+        <label for="attach" class="attach-doc-button">
+          <i title="attach an document" class="bi bi-plus-lg"></i>
+        </label>
+        <input type="file" name="image" id="attach">
+        <textarea spellcheck="false" name="message" placeholder="Message..."></textarea>
+        {% comment %} <i title="write-emoji" class="bi bi-emoji-smile write-emoji"></i> {% endcomment %}
+        <i title="send" class="bi bi-send send-button"></i>
+      </div>
+{% comment %} </aside> {% endcomment %}

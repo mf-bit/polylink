@@ -1,0 +1,29 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}PolyLink{% endblock title %}</title>
+  <link rel="stylesheet" href={% static "styles/home.css" %} />
+  <link rel="stylesheet" href={% static "styles/notifications.css" %} />
+  <link rel="stylesheet" href={% static "styles/bootstrap-icons.css" %} />
+  <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+  <style>
+    @font-face {
+      font-family: "Bootstrap Font";
+      src: url({% static "styles/fonts/bootstrap-icons.woff" %}) format("woff"), 
+          url({% static "styles/fonts/bootstrap-icons.woff2" %}) format("woff2");
+    }
+  </style>
+  <script defer src={% static "scripts/notifications.js" %}></script>
+
+  {% block script %}{% endblock script %}
+  {% block style %}{% endblock style %}
+</head>
+<body>
+    {% block body %}{% endblock body %}
+</body>
+</html>

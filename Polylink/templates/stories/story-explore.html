@@ -1,0 +1,12 @@
+{% for story in stories %}
+    <a href={% url "stories:get-story" id=story.id %}>
+    <div class="story">
+        <img class="cover" src={% url "stories:story-thumbnail" id=story.id %} alt="cover">
+        <div class="avatar story-avatar">
+        <img src={% url "users:avatar" id=story.author.0.id %} alt="profil">
+        </div>
+        <p class="user firstname">{{ story.author.0.first_name }}</p>
+        <p class="user lastname">{{ story.author.0.last_name }}</p>
+    </div>
+    </a>
+{% endfor %}

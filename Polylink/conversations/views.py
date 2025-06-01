@@ -21,21 +21,20 @@ class ConversationView(View):
 
         messages = list(db.db.messages.find({'conversation': bson.ObjectId(id)}))
     
-        return render(request, 'conversations/conversation.html', {'conversation_id': id , 'messages': messages, 'user_id': user_id, 'other_user': other_user})
+        return render(request, 'conversations/inside-conversation.html', {'conversation_id': id , 'messages': messages, 'user_id': user_id, 'other_user': other_user})
     
-    def post(self, request, username):
+    def post(self, request, id):
         user_id = db.get_user_id(request)
-        other_user_id = db.db.users.find_one({'username': username})['_id']
-
+        
         # Verify if the other_user_id is not the user itseft
-        if user_id == other_user_id:
+        if user_id == id:
             return JsonResponse(data={'error': 'You cannot talk to your self bro, what u doing 🤨'})
         
         # Verify if the other user does not already have a discussion
         conversation = db.db.conversations.find_one({
             '$and': [
                 {'participants': {'$in': [bson.ObjectId(user_id)]}},
-                {'participants': {'$in': [bson.ObjectId(other_user_id)]}},
+                {'participants': {'$in': [bson.ObjectId(id)]}},
             ]
         })
  
@@ -43,7 +42,7 @@ class ConversationView(View):
             return JsonResponse(data={'error': 'Bro, you are already in talk with this guys, come on man 😭'})
         
         conversation = db.db.conversations.insert_one({
-            'participants': [bson.ObjectId(user_id), bson.ObjectId(other_user_id)]
+            'participants': [bson.ObjectId(user_id), bson.ObjectId(id)]
         })
 
         # Return to the client the id of the newly inserted conversation

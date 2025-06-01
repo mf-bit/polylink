@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Followings ~ {{ user.username }}{% endblock title %}
+
+{% block script %}
+  <script defer type='module' src={% static "scripts/following.js" %}></script>
+{% endblock script %}
+
+{% block body %}
+  {% include "navbar.html" %}
+
+  <main class="container">
+    {% with active_link='follows-link' %}
+      {% include "sidebar.html" %}
+    {% endwith %}
+
+    <section class="feed">
+    
+      {% if not user.followings %}
+        <p class='default-post-placeholder'>
+            No followings, You are gonna die alone 
+        <img src={% static "images/no-following-default.png" %} alt="">
+        </p>
+    {% elif posts and stories %}
+        <div class="stories">
+            {% include "stories/story-explore.html" %}
+        </div>
+
+        <div class="followers-list">
+            <h3>Followings</h3>
+            {% for id, username in user.following_infos.items%}
+                <div>
+                    <div class="avatar">
+                        <img src={% url "users:avatar" id=id %} alt="profil">
+                    </div>
+                    <p>{{ username }}</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% include "posts/post-explore.html" %}
+        
+    {% endif %}
+    </section>
+
+    {% include "conversations/conversation.html" %}
+  </main>
+{% endblock body %}
+

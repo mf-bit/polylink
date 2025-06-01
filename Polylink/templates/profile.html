@@ -1,178 +1,20 @@
+{% extends "base.html" %}
+
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}Profile ~ {{ user.first_name }} {{ user.last_name }}{% endblock title %}
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profile - {{ user.first_name }} {{ user.last_name }}</title>
-  <link rel="stylesheet" href={% static "styles/home.css" %} />
+{% block style %}
   <link rel="stylesheet" href={% static "styles/profile.css" %} />
-  <link rel="stylesheet" href={% static "styles/bootstrap-icons.css" %} />
-  <link rel="stylesheet" href={% static "styles/notifications.css" %} />
-  <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
-  <script defer src={% static "scripts/home.js" %}></script>
-  <script defer src={% static "scripts/notifications.js" %}></script>
-</head>
+{% endblock style %}
 
-<body>
-  <header class="navbar">
-    <div class="logo">PolyLink</div>
-    <div class="search-bar">
-      <i class="bi bi-search search-icon"></i>
-      <input class='search-user-input' type="text" placeholder="Search a user by username" url={{ search_user_base_url }} />
-      <div class="results" url={{ start_conversation_base_url }} />
-        <p class="nothing-found-placeholder">Nothing found 😭😁🤧</p>
-      </div>
-    </div>
-    <div class="logout-avatar">
-      <a href="{% url "users:logout" %}">
-        <button class="button logout-btn">Log out</button>
-      </a>
-      <div class="avatar small">
-          <img src={% url "users:avatar" id=user.id %} alt="profil">
-      </div>
-    </div>
-  </header>
+{% block body %}
+  {% include "navbar.html" %}
 
   <main class="container">
-    <aside class="sidebar">
-      <div class="profile">
-        <div class="avatar">
-          <img src={% url "users:avatar" id=user.id %} alt="profil">
-        </div>
-        <div class="infos">
-          <h4>{{ user.first_name }} {{ user.last_name }}</h4>
-          <p>@{{ user.username }}</p>
-        </div>
-      </div>
-      <nav>
-        <a href={% url "users:home" %}><i class="bi bi-house-heart"></i>
-          <p>Home</p>
-        </a>
-        <a href={% url "users:explore" %}><i class="bi bi-compass"></i>
-          <p>Explore</p>
-        </a>
-         <!-- Section notifications dans la navigation --> 
-        <div class="nav-item notifications-container">
-            <a href="#" class="notifications-link nav-link">
-                <i class="bi bi-bell"></i>
-                {% if unread_notifications_count > 0 %}
-                    <span class="badge">{{ unread_notifications_count }}</span>
-                {% endif %}
-                <p>Notifications</p>
-            </a>
-
-            <!-- Dropdown des notifications -->
-            <div class="notifications-dropdown">
-                <div class="notifications-header">
-                    <h4>Notifications récentes</h4>
-                    {% if unread_notifications_count > 0 %}
-                        <form method="POST" action="{% url 'users:mark-all-read' %}" class="mark-all-read-form">
-                            {% csrf_token %}
-                            <button type="submit" class="mark-all-read">Tout marquer comme lu</button>
-                        </form>
-                    {% endif %}
-                </div>
-
-                <div class="notifications-list">
-                    {% if notifications %}
-                        {% for notif in notifications %}
-                        <div class="notification-item {% if not notif.read %}unread{% endif %}" data-notification-id="{{ notif.id }}" data-post-id="{{ notif.post_id }}">
-                            <img src="{% url 'users:avatar' id=notif.actor_id %}" class="notification-avatar" alt="Avatar">
-                            <div class="notification-content">
-                                <div class="notification-header">
-                                    <p>
-                                        <strong>@{{ notif.actor_username }}</strong> a
-                                        {% if notif.action_type == "like" %}
-                                            aimé
-                                        {% elif notif.action_type == "comment" %}
-                                            commenté
-                                        {% else %}
-                                            interagi avec
-                                        {% endif %}
-                                        votre publication
-                                    </p>
-                                    <small>{{ notif.timestamp|date:"H:i - d M Y" }}</small>
-                                </div>
-                                
-                                {% if notif.content %}
-                                    <div class="notification-message">
-                                        {% if notif.action_type == "comment" %}
-                                            <i class="bi bi-chat-left-text"></i>
-                                        {% else %}
-                                            <i class="bi bi-heart-fill"></i>
-                                        {% endif %}
-                                        <p>{{ notif.content }}</p>
-                                    </div>
-                                {% endif %}
-                                
-                                <!-- Boutons d'action pour la notification -->
-                                <div class="notification-actions">
-                                    {% if not notif.read %}
-                                    <form method="POST" action="{% url 'users:mark-notification-read' notification_id=notif.id %}" class="mark-read-form">
-                                        {% csrf_token %}
-                                        <button type="submit" class="mark-read-btn">
-                                            <i class="bi bi-check-circle"></i> Marquer comme lu
-                                        </button>
-                                    </form>
-                                    {% endif %}
-                                </div>
-                                
-                                <!-- Aperçu de la publication -->
-                                <div class="notification-post-preview" id="post-preview-{{ notif.post_id }}">
-                                    <div class="loading-indicator">Chargement...</div>
-                                    <div class="post-preview-content" style="display: none;">
-                                        <!-- Le contenu sera chargé dynamiquement via JavaScript -->
-                                    </div>
-                                    <div class="quick-reply">
-                                        <form method="POST" action="{% url 'posts:comment-post' id=notif.post_id %}" class="quick-reply-form">
-                                            {% csrf_token %}
-                                            <input type="text" name="content" placeholder="Répondre..." class="quick-reply-input">
-                                            <button type="submit" class="quick-reply-btn">
-                                                <i class="bi bi-send"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-
-                        <!-- Pagination -->
-                        {% if has_more_notifications %}
-                        <div class="notifications-pagination">
-                            <a href="?page={{ current_page|add:1 }}" class="load-more-notifications">
-                                Charger plus de notifications
-                            </a>
-                        </div>
-                        {% endif %}
-                    {% else %}
-                        <div class="notification-item">
-                            <div class="notification-content" style="text-align: center; padding: 2rem;">
-                                <p style="color: #666;">Aucune notification pour le moment</p>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        <a href="#"><i class="bi bi-people"></i>
-          <p>Follows</p>
-        </a>
-        <a href="#"><i class="bi bi-palette"></i>
-          <p>Theme</p>
-        </a>
-        <a href="#"><i class="bi bi-gear"></i>
-          <p>Settings</p>
-        </a>
-        <a href={% url "users:profile" id=user.id %} class="active"><i class="bi bi-person"></i>
-          <p>Profile</p>
-        </a>
-      </nav>
-      <button class="create-post-btn">Create Post</button>
-    </aside>
+    {% with active_link='profile-link' %}
+      {% include "sidebar.html" %}
+    {% endwith %}
 
     <section class="feed">
       <div class="piw">
@@ -229,5 +71,4 @@
       </div>
     </section>
   </main>
-</body>
-</html>
+{% endblock body %}

@@ -1,0 +1,20 @@
+  <header class="navbar">
+    <div class="logo">PolyLink</div>
+    <div class="search-bar">
+      <i class="bi bi-search search-icon"></i>
+      <input class='search-user-input' type="text" placeholder="Search a user by username" url={{ search_user_base_url }} />
+      <div class="results" startConversationUrl={{ start_conversation_base_url }} followUserUrl = {{ follow_user_base_url }} />
+        <p class="nothing-found-placeholder">Nothing found 😭😁🤧</p>
+      </div>
+    </div>
+    <div class="logout-avatar">
+      <a href="{% url "users:logout" %}">
+        <button class="button logout-btn">Log out</button>
+      </a>
+      <a href={% url "users:profile" id=user.id %}>
+        <div class="avatar small">
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
+        </div>
+      </a>
+    </div>
+  </header>

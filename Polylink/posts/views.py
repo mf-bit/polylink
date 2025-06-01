@@ -16,7 +16,7 @@ class PostView(View):
             "author": bson.ObjectId(user_id),
             "content": content,
             "date": datetime.now(timezone.utc),
-            "likes": [],
+            "likes": 0,
             "views": 0,
         })
 
@@ -54,7 +54,6 @@ class PostImageView(View):
         content_type = f"image/{post["image_format"]}"
         return HttpResponse(content=img_bytes, content_type=content_type)
     
-# polylink/posts/views.py
 class LikeView(View):
     def get(self, request, id: str):
         user_id = db.get_user_id(request)
@@ -70,7 +69,7 @@ class LikeView(View):
                 return JsonResponse({"error": "Post introuvable"}, status=404)
 
             # Vérifier si l'utilisateur a déjà liké
-            if user_id_obj in post.get("likes", []):
+            if user_id_obj in post.get("likes", 0):
                 return JsonResponse({"error": "Déjà liké"}, status=400)
 
             # Ajouter le like

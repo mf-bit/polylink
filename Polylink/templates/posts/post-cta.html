@@ -1,0 +1,20 @@
+<form method="POST" action={% url "posts:post" %} class="post-cta-wrapper" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="post-cta">
+    <a href={% url "users:profile" id=user.id %}>
+        <div class="avatar story-avatar">
+            <img src={% url "users:avatar" id=user.id %} alt="profil">
+        </div>
+    </a>
+    <textarea spellcheck="false" name="content" placeholder="What's on your mind, {{user.first_name}}?"></textarea>
+    <input type="file" name="image" id="attach">
+    <label for="attach" class="attach-image-button">
+        <i title="attach an image" class="bi bi-paperclip"></i>
+    </label>
+    <button type="button" class="button post-cta-button">Post</button>
+    </div>
+    <div class="attach-wrapper">
+    <img src="" alt="attach" class="post-attach">
+    <i class="bi bi-x-circle-fill discard-attach-button"></i>
+    </div>
+</form>

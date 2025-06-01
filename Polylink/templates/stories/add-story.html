@@ -1,0 +1,11 @@
+<label class="story add-story" for="story-attach" url={% url "stories:story" %}>
+    <img class="cover" src={% url "users:avatar" id=user.id %} alt="cover">
+    <a href={% url "users:profile" id=user.id %}>
+        <div class="avatar story-avatar">
+        <img src={% url "users:avatar" id=user.id %} alt="profil">
+        </div>
+    </a>
+    <p class="user firstname">Your</p>
+    <p class="user lastname">Story</p>
+    <input type="file" name="story-attach" class="story-attach-input" id="story-attach">
+</label>

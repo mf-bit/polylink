@@ -1,0 +1,62 @@
+{% load static %}
+
+{% if posts %}
+   {% for post in posts %}
+          <article class="post">
+          <div class="post-header">
+            <div class="avatar">
+              <img src={% url "users:avatar" id=post.author.0.id %} alt="profil">
+            </div>
+            <div>
+              <h4>{{post.author.0.first_name}} {{post.author.0.last_name}}</h4>
+              <p>{{post.date|stringformat:"s"}}</p>
+            </div>
+            <div class="toggle-follow-button-wrapper">
+              {% if post.followed %}
+                  <button class="button toggle-follow-button" followed='true' followUrl={% url "users:follow" id=post.author.0.id %} >unfollow</button>
+              {% else %}
+                  <button class="button toggle-follow-button" followed='false' followUrl={% url "users:follow" id=post.author.0.id %} >follow</button>
+              {% endif %}
+            </div>
+          </div>
+          <p class="post-text">{{post.content}}</p>  <!-- This has 'white-space: pre-line', be careful then -->
+          {% if post.image %}
+             <img src={% url "posts:post-image" id=post.id %} alt="Post Content" class="post-image" />
+          {% endif %}
+          <div class="post-actions">
+            <i class="like-button bi bi-heart-fill"></i>
+            <p class="likes">{{ post.likes }}</p>
+            <i class="bi bi-eye"></i>
+            <p class="views">{{ post.views }}</p>
+            <i class="see-comment-button bi bi-chat-dots"></i>
+          </div>
+          <div class="post-comments">
+            <!-- The user write its comment here -->
+            <form method="Post" action={% url "posts:comment-post" id=post.id %} class="comment-cta">
+              {% csrf_token %}
+              <div class="avatar post-avatar">
+                <img src={% url "users:avatar" id=user.id %} alt="profil">
+              </div>
+              <textarea name="content" spellcheck="false" type="text" placeholder="Want to let a comment, {{ user.first_name }}?"></textarea>
+              <button type="button" class="button comment-cta-button">Pin</button>
+            </form>
+
+            <!-- The other comments -->
+            {% for comment in post.comments %}
+                <div class="post-comment">
+                  <div class="avatar post-avatar">
+                    <img src={% url "users:avatar" id=comment.author %} alt="profil">
+                  </div>
+                  <p>{{comment.content}}</p> <!-- This has 'white-space: pre-line', be careful then -->
+                </div>
+            {% endfor %}
+          </div>
+          <!-- <p class="likes">Liked by Ernest Achiever and 2,323 others</p> -->
+        </article>
+    {% endfor %}
+{% else %}
+<p class='default-post-placeholder'>
+    No post yet 🤧
+    <img src={% static "images/no_post.jpg" %} alt="">
+</article>
+{% endif %}

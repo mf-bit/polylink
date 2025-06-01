@@ -10,9 +10,7 @@ import json
 ############# This is a Copilot code: must look it thoroughly after #########################
 ############# Look at an already build tool that do the job using AI (hint💡: github) ######
 import cv2
-import numpy as np
 import tempfile
-import io
 
 def extract_first_frame_as_png(video_bytes: bytes) -> bytes:
     # Save video bytes to a temporary file
@@ -41,7 +39,7 @@ class StoryView(View):
         story = db.db.stories.find_one({"_id": bson.ObjectId(id)})
         # In Django template we must not have a variable staring with an underscore: so _id has to be rename
         story["id"] = story["_id"]
-        return render(request, "stories/story.html", {"story": story})
+        return render(request, "stories/story-content.html", {"story": story})
     
     def post(self, request:HttpRequest):
         # Retrive the user's id

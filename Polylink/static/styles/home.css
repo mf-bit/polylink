@@ -85,13 +85,14 @@ body {
 }
 
 .search-bar .results{
-  width: 130%;
+  min-width: 150%;
+  width: auto;
   height: fit-content;
-  min-height: 70px;
+  min-height: 50px;
   max-height: 50vh;
   position: absolute;
   top: calc(100% + 1rem);
-  left: calc(-15%);
+  left: calc(-25%);
   background-color: white; 
   border-bottom: 2px solid #6c5ce7; 
   border-radius: 0px 0px 8px 8px;
@@ -99,6 +100,7 @@ body {
   flex-direction: column;
   gap: 10px;
   padding: 20px;
+  overflow-y: auto;
   visibility: hidden;
 }
 
@@ -127,7 +129,9 @@ body {
   color: #6c5ce7;
   flex: 1;
   text-align: right ;
+  min-width: fit-content;
 }
+
 .search-bar .results .result p::first-letter{
   color: rgb(255, 102, 0);
 }
@@ -135,6 +139,14 @@ body {
 .search-bar .results .result .avatar{
   width: 30px;
   height: 30px;
+}
+
+.search-bar .results .result .toggle-follow-button, .search-bar .results .result .chat-button{
+  padding: 0.1rem 0.6rem;
+  height: fit-content;
+  font-size: 0.9rem;
+  min-width: 62px;
+  margin-left: 5px;
 }
 
 .search-bar input:focus{
@@ -240,6 +252,10 @@ body {
   gap: 1.5rem;
   font-weight: bold;
   border-left: 8px solid transparent;
+}
+
+.sidebar nav a.not-active{
+  opacity: 0.5;
 }
 
 .sidebar nav a.active, .sidebar nav a:hover {
@@ -433,6 +449,42 @@ body {
   box-shadow: none;
 }
 
+.followers-list{
+  margin: 2rem 0px 1rem 0px;
+  display: flex;
+  gap: 1.3rem;
+  padding: 2rem 0.8rem 0.6rem 1rem;
+  position: relative;
+  /* overflow-y: a; */
+  overflow-x : auto;
+}
+
+.followers-list::-webkit-scrollbar{
+  display: none;
+}
+
+.followers-list h3{
+  position: absolute;
+  top: 0rem;
+}
+
+.followers-list > div{
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.followers-list > div p{
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.followers-list .avatar{
+  width: 55px;
+  height: 55px;
+}
+
 .post-cta-wrapper{
   margin-bottom: 1rem;
   width: 100%;
@@ -579,6 +631,39 @@ body {
   border-radius: 10px;
   padding: 1rem;
   margin-bottom: 1rem;
+}
+
+.post .toggle-follow-button-wrapper{
+  flex: 1;
+  /* border: 2px solid red; */
+}
+
+.post .toggle-follow-button{
+  padding: 0.1rem 0.6rem;
+  height: fit-content;
+  font-size: 0.9rem;
+  min-width: 62px;
+  float: right;
+}
+
+.default-post-placeholder{
+  margin: 0vh auto 0px auto;
+  font-size: 1.4rem;
+  width: 100%;
+  text-align: center;
+  /* padding: 20px; */
+  /* border: 2px solid #6c5ce7; */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.default-post-placeholder img{
+  width: 90%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 10px;
 }
 
 .post-header {

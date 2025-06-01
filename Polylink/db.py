@@ -239,12 +239,6 @@ def update_user(user_id, update_data):
     update_data.pop('avatar', None)
     update_data.pop('avatar_format', None)
 
-    # Ajoutez ici la gestion des champs phone_number, bio et location
-    # Assurez-vous que ces champs sont présents dans update_data avant de les utiliser
-    # update_data['phone_number'] = update_data.get('phone_number', None)
-    # update_data['bio'] = update_data.get('bio', None)
-    # update_data['location'] = update_data.get('location', None)
-
     if not update_data: # No valid fields to update
         return False
 
@@ -254,8 +248,10 @@ def update_user(user_id, update_data):
     )
     return result.modified_count > 0
 
+
+
+
 if __name__ == '__main__':
-    db.conversations.drop()
-    db.messages.drop()
-
-
+    db.users.update_many({}, {
+        '$unset': {'followings': 0}
+    })
