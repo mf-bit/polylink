@@ -17,4 +17,6 @@ urlpatterns = [
     path("notifications/read/all/", views.MarkAllNotificationsReadView.as_view(), name="mark-all-read"),
     path("profile/<str:id>/", views.ProfileView.as_view(), name="profile"),
     path('relationship/graph/', views.RelationshipGraphView.as_view(), name='relationship-graph'),
+    path('relationship/data/', views.RelationshipGraphDataView.as_view(), name='relationship-graph-data'),
 ]
+

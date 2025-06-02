@@ -12,12 +12,13 @@
       {% include "sidebar.html" %}
     {% endwith %}
 
-    <section class="feed relationship-graph">
+    <section class="feed relationship-graph" dataUrl={{ relationship_graph_data_url }}>
 
     </section>
   </main>
 {% endblock body %}
 
 {% block script %}
+  <script defer type='module' src={% static "scripts/cytoscape.min.js" %}></script>
   <script defer type='module' src={% static "scripts/relationship-graph.js" %}></script>
 {% endblock script %} 

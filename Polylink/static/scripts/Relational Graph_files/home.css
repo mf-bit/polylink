@@ -320,8 +320,7 @@ body {
 
 .feed.relationship-graph{
   max-width: 9999rem;
-  border: 2px solid #6c5ce774;
-  border-radius: 30px;
+  border: 2px solid red;
 }
 
 .feed::-webkit-scrollbar {

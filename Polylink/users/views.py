@@ -762,6 +762,7 @@ class RelationshipGraphView(View):
             follow_user_base_url = follow_user_base_url[0:index_2nd_last_slash + 1]  # We just need the base root
 
             context = {
+                'relationship_graph_data_url': reverse('users:relationship-graph-data'),
                 "user": user, 
                 'search_user_base_url': search_user_base_url,
                 'start_conversation_base_url': start_conversation_base_url,
@@ -773,3 +774,62 @@ class RelationshipGraphView(View):
             }
 
             return render(request, 'users/relationship-graph.html', context)
+        
+class RelationshipGraphDataView(View):
+    def get(self, request):
+        # Retrive user
+        user = db.get_user(request)
+
+        # Return the data needed by cy
+        found = {  # a dictionnary of the already checked user
+        }
+        stack = [user]  # A list of the next user to treat
+        elements= {     # The data to send to th front (cytoscape). If you do not know what it is, bro, google it
+            'nodes': [],
+            'edges': [],
+        }  
+
+        while stack:
+            current_user = stack[0]
+            # if not found.get(current_user['_id'], False):
+            if not found.get(str(current_user['_id']), False):
+                node = {'data': {
+                    'id': str(current_user['_id']), 
+                    'label': current_user['username'],
+                    'image': reverse('users:avatar', kwargs={'id':str(current_user['_id'])})
+                    }
+                }
+                elements['nodes'].append(node)
+                # found[current_user['_id']] = True
+                found[str(current_user['_id'])] = True
+
+            for following_id in current_user['followings']:
+                # Fetch the user
+                following = db.db.users.find_one({'_id': following_id}, {'_id':1, 'username':1, 'followings':1})
+
+                # Add it as nodes if not already found
+                if not found.get(current_user['_id'], False):
+                # if not found.get(str(current_user['_id']), False):
+                    node = {'data': {
+                        'id': str(following['_id']), 
+                        'label': following['username'],
+                        'image': reverse('users:avatar', kwargs={'id':str(following['_id'])})
+                        }
+                    }
+
+                    elements['nodes'].append(node)
+                    # found[current_user['_id']] = True
+                    found[str(current_user['_id'])] = True
+
+                # Add the following relationsip between the current_user and its following
+                edge = {'data': {'source': str(current_user['_id']), 'target': str(following['_id'])}}
+                elements['edges'].append(edge)
+
+                # Add this newly discovered following to the stack, so that it can be treated too (find its relationships)
+                stack.append(following)
+            
+            stack.pop(0)
+
+        # Return the build data to the front as a Json response
+        response = JsonResponse(data=elements)
+        return response
