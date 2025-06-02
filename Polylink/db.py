@@ -21,6 +21,7 @@ def register(firstname, lastname, username, password, profile_bytes, profile_for
         "password": bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8"),
         "avatar": Binary(profile_bytes),
         "avatar_format": profile_format,
+        'followings': [],
     })
     return
 
@@ -253,5 +254,6 @@ def update_user(user_id, update_data):
 
 if __name__ == '__main__':
     db.users.update_many({}, {
-        '$unset': {'followings': 0}
+        '$set': {'followings': []}
     })
+

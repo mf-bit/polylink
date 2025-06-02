@@ -164,9 +164,7 @@ class ExploreView(View):
             """ Djnago templates do not like obejct's attribute that start with a underscore '_'.
                 So, we have to turn 'user._id' into 'user.id'. Also, _id is of type bson.ObjectId, and we want it to be a string once in the template."""
             user["id"] = user["_id"]
-            print('===============')
-            print(type(user['followings']))
-            print('===============')
+
             # Build a querying pipeleine for posts retrieval: we want to retrieve the most recent post along with their comments
             pipeline = [
                 {"$match": {'author': {'$ne': user["_id"]} } },
@@ -723,3 +721,55 @@ class ProfileView(View):
 
         # Rediriger vers la page de profil après la mise à jour
         return redirect("users:profile", id=str(user["_id"]))
+
+class RelationshipGraphView(View):
+    def get(self, request):
+        # Retrive the delicious session_id cookie
+        session_id = request.COOKIES.get("session_id", None)
+        if not session_id:  # there is no active connection then
+            return redirect("users:login")
+        else:
+            # Fetch the user
+            user = db.get_user_by_session_id(session_id)
+            # the user might not exist or the session is any longer active: we have to check for it then
+            if not user:
+                response = redirect("users:login")
+                # Ask the client to discard this session: we no longer need it since it is expired
+                response.delete_cookie("session_id")
+                return response
+            
+            """ Djnago templates do not like obejct's attribute that start with a underscore '_'.
+                So, we have to turn 'user._id' into 'user.id'. Also, _id is of type bson.ObjectId, and we want it to be a string once in the template."""
+            user["id"] = user["_id"]
+
+            # Récupérer les notifications avec pagination
+            page = int(request.GET.get('page', 1))
+            notifications_data = db.get_user_notifications(user["_id"], page=page)
+
+            # The base's url to use when to search a user
+            search_user_base_url = reverse('users:search', kwargs={'pattern':'_'})
+            index_2nd_last_slash = search_user_base_url.rfind('/', 0, len(search_user_base_url) - 1)
+            search_user_base_url = search_user_base_url[0:index_2nd_last_slash + 1]  # We just need the base root
+
+            # The base's url to use when to start a new conversation
+            start_conversation_base_url = reverse('conversations:start-conversation', kwargs={'id':'_'})
+            index_2nd_last_slash = start_conversation_base_url.rfind('/', 0, len(start_conversation_base_url) - 1)
+            start_conversation_base_url = start_conversation_base_url[0:index_2nd_last_slash + 1]  # We just need the base root
+            
+            # The base's url to use when to make the user follow another user
+            follow_user_base_url = reverse('users:follow', kwargs={'id':'_'})
+            index_2nd_last_slash = follow_user_base_url.rfind('/', 0, len(follow_user_base_url) - 1)
+            follow_user_base_url = follow_user_base_url[0:index_2nd_last_slash + 1]  # We just need the base root
+
+            context = {
+                "user": user, 
+                'search_user_base_url': search_user_base_url,
+                'start_conversation_base_url': start_conversation_base_url,
+                'follow_user_base_url': follow_user_base_url,
+                "notifications": notifications_data["notifications"],
+                "unread_notifications_count": notifications_data["unread_count"],
+                "has_more_notifications": notifications_data["has_more"],
+                "current_page": page
+            }
+
+            return render(request, 'users/relationship-graph.html', context)

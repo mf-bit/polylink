@@ -37,6 +37,11 @@ textarea::-webkit-scrollbar{
 body {
   background: #f4f2ff;
   color: #333;
+  height: 100vh;
+  display: flex;              /* The body contains a navbar and a .container. This is used to make the .container take the available */
+  flex-direction: column;     /* of the body element */ 
+  align-items: stretch;   
+  overflow: hidden;
 }
 
 .navbar {
@@ -203,8 +208,11 @@ body {
   display: flex;
   gap: 1rem;
   padding: 1rem 2rem;
+  width: 100%;
   max-width: 1350px;
   margin: 0px auto;
+  height: 100%;
+  align-items: stretch;
 }
 
 /* Sidebar */
@@ -296,11 +304,27 @@ body {
   border-radius: 20px;
   cursor: pointer;
 }
+/* The relational graph block */
+
 
 /* Feed */
 .feed {
   flex: 1;
   max-width: 650px;
+  overflow: auto;
+}
+
+.feed.relationship-graph{
+  max-width: 9999rem;
+  border: 2px solid red;
+}
+
+.feed::-webkit-scrollbar {
+  width: 3px;  /* Width for vertical scrollbar */
+}
+
+.feed::-webkit-scrollbar-track {
+    background: #dddddd89; /* Track color */
 }
 
 .stories {

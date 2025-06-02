@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Relational Graph{% endblock title %}
+
+{% block body %}
+  {% include "navbar.html" %}
+
+  <main class="container">
+    {% with active_link='relathionship-graph-link' %}
+      {% include "sidebar.html" %}
+    {% endwith %}
+
+    <section class="feed relationship-graph">
+
+    </section>
+  </main>
+{% endblock body %}
+
+{% block script %}
+  <script defer type='module' src={% static "scripts/relationship-graph.js" %}></script>
+{% endblock script %} 
