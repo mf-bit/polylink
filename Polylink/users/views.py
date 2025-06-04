@@ -781,18 +781,18 @@ class RelationshipGraphDataView(View):
         user = db.get_user(request)
 
         # Return the data needed by cy
-        found = {  # a dictionnary of the already checked user
-        }
+        found = {}  # a dictionnary of the already discovered user: the key is the user id and the value can be either 1 or 2
+                    # if 1, the user is alredady found. If 2, the user is already treat, we must not add it to the stack again (we will create an infinite loop otherwise: I know it beaause...😒)
         stack = [user]  # A list of the next user to treat
         elements= {     # The data to send to th front (cytoscape). If you do not know what it is, bro, google it
             'nodes': [],
             'edges': [],
         }  
 
+        i = 0
         while stack:
             current_user = stack[0]
-            # if not found.get(current_user['_id'], False):
-            if not found.get(str(current_user['_id']), False):
+            if not found.get(str(current_user['_id']), None):
                 node = {'data': {
                     'id': str(current_user['_id']), 
                     'label': current_user['username'],
@@ -800,7 +800,6 @@ class RelationshipGraphDataView(View):
                     }
                 }
                 elements['nodes'].append(node)
-                # found[current_user['_id']] = True
                 found[str(current_user['_id'])] = True
 
             for following_id in current_user['followings']:
@@ -808,7 +807,7 @@ class RelationshipGraphDataView(View):
                 following = db.db.users.find_one({'_id': following_id}, {'_id':1, 'username':1, 'followings':1})
 
                 # Add it as nodes if not already found
-                if not found.get(current_user['_id'], False):
+                if not found.get(current_user['_id'], None):
                 # if not found.get(str(current_user['_id']), False):
                     node = {'data': {
                         'id': str(following['_id']), 
@@ -825,9 +824,11 @@ class RelationshipGraphDataView(View):
                 edge = {'data': {'source': str(current_user['_id']), 'target': str(following['_id'])}}
                 elements['edges'].append(edge)
 
-                # Add this newly discovered following to the stack, so that it can be treated too (find its relationships)
-                stack.append(following)
+                # Add this newly discovered following to the stack, so that it can be treated too (find its relationships) if not treated yet
+                if found.get(current_user['_id'], None) != 2:
+                    stack.append(following)
             
+            found[current_user['_id']] = 2
             stack.pop(0)
 
         # Return the build data to the front as a Json response
